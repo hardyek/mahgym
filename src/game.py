@@ -1,7 +1,7 @@
 from typing import List, Optional
 import random
 
-from player import Player
+from src.player import Player
 
 class MahjongGame:
     def __init__(self, previous_winner=random.randint(0,3)):
