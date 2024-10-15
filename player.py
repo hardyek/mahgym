@@ -5,7 +5,7 @@ class Player:
         self.seat = seat
         self.hand: List[int] = []
         self.exposed: List[int] = []
-        self.flowers: List[int] = []
+        self.specials: List[int] = []
         self.wind: int = ""
 
     def recieve(self, tile: int):

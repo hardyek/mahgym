@@ -47,3 +47,16 @@ to_shorthand = {
     41 : "3s",
     42 : "4s"
 }
+
+index_to_wind = {
+    0 : "East",
+    1 : "South",
+    2 : "West",
+    3 : "North"
+}
+
+def array_to_shorthand(array):
+    array_shorthand = []
+    for tile in array:
+        array_shorthand.append(to_shorthand[tile])
+    return array_shorthand

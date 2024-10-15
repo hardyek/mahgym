@@ -62,3 +62,35 @@ class MahjongGame:
         self.deal_starting_hands()
         # Assign winds to players
         self.assign_winds()
+        # Expose specials and redraw
+        self.expose_redraw_specials()
+
+    def deal_starting_hands(self):
+        # Deals 14 tiles to the starting player
+        # and 13 to the other three player
+        # removing them from the deck in the process
+        for i, player in enumerate(self.players):
+            if i == self.starting_player:
+                for _ in range(14):
+                    tile = self.deck.pop(0)
+                    player.hand.append(tile)
+            else:
+                for _ in range(13):
+                    tile = self.deck.pop(0)
+                    player.hand.append(tile)
+
+    def assign_winds(self):
+        # Assigns winds to players based on the starting player
+        for i in range(4):
+            self.players[(self.starting_player + i) % 4].wind = i
+
+    def expose_redraw_specials(self):
+        # Add any specials to the specials array for the player and redraw from back of the deck
+        special_encodings = [35, 36, 37, 38, 39, 40, 41, 42]
+        for player in self.players:
+            for i in range(len(player.hand)):
+                if player.hand[i] in special_encodings:
+                    player.specials.append(player.hand[i])
+                    # Technically it doesn't really matter where this tile is drawn from but whatever
+                    # Good to stick to the rules i guess
+                    player.hand[i] = self.deck.pop(-1)
