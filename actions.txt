@@ -1,0 +1,43 @@
+Roll
+
+- Roll the three dice and start the deal
+
+Deal
+
+- 
+
+Deal Special
+
+-
+
+Draw
+
+- A player is dealt a tile from the front of the Deck
+
+Draw Special
+
+- A player is dealt a tile from the back of the Deck
+
+Pong
+
+- A player picks up Pile[-1] and completes a Pong revealing it to other players.
+
+Chow
+
+- A player picks up Pile[-1] and completes a Chow revealing it to other players.
+
+Kong
+
+1. A player picks up Pile[-1] to complete a Kong and reveals it to other players.
+
+2. A player draws a tile to complete a Kong and reveals it to other players.
+
+- A player Draws Special to make up for the extra tile lost.
+
+Eyes
+
+- A player picks up the final piece to form their Eyes implying their winning hand.
+
+Discard
+
+- A player discards a tile from their hand into the pile
