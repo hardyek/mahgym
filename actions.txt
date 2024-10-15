@@ -1,22 +1,14 @@
-Roll
-
-- Roll the three dice and start the deal
-
-Deal
-
-- 
-
-Deal Special
-
--
-
+-----------------------------------------------------------------------------
+Stage 1 - Pick Up
+-----------------------------------------------------------------------------
 Draw
 
 - A player is dealt a tile from the front of the Deck
 
 Draw Special
 
-- A player is dealt a tile from the back of the Deck
+- A player is dealt a tile from the back of the Deck 
+(i.e they they drew a flower or seasons  from back or they completed a kong)
 
 Pong
 
@@ -34,9 +26,15 @@ Kong
 
 - A player Draws Special to make up for the extra tile lost.
 
-Eyes
+-----------------------------------------------------------------------------
+Stage 2 - Win? (Not an actionable stage)
+-----------------------------------------------------------------------------
 
-- A player picks up the final piece to form their Eyes implying their winning hand.
+If a player has completed a winning set end the game etc...
+
+-----------------------------------------------------------------------------
+Stage 3 - Discard
+-----------------------------------------------------------------------------
 
 Discard
 
