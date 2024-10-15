@@ -1,4 +1,4 @@
-Encoding | Description              | Shorthand
+Encoding : Description              : Shorthand
 
 1-9      : Numbers 1-9              : n1-9
 10-18    : Bamboo 1-9               : b1-9
