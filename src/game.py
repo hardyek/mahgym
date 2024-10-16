@@ -55,7 +55,7 @@ class MahjongGame:
         # Roll the 3 dice
         self.dice_roll = random.randint(3,18)
         # Calculate the starting player
-        self.starting_player = self.roller + (self.dice_roll % 4 - 1)
+        self.starting_player = self.roller + (self.dice_roll % 4 - 1) - 1
         # Sync this value to be the player who's turn it is
         self.current_player = self.starting_player
         # Deal the starting hands
@@ -94,3 +94,24 @@ class MahjongGame:
                     # Technically it doesn't really matter where this tile is drawn from but whatever
                     # Good to stick to the rules i guess
                     player.hand[i] = self.deck.pop(-1)
+
+    def make_action_pickup(self, action):
+        if action == 0:
+            self.draw()
+
+    def make_action_discard(self, action):
+        self.discard(action)
+
+
+    def draw(self):
+        # Take tile from front of the deck
+        tile = self.deck.pop(0)
+        # Add it to players hand
+        self.players[self.current_player].recieve(tile)
+
+    def discard(self, tile):
+        # Discard tile from players hand to the pile (also now the takable tile).
+        self.players[self.current_player].discard(tile)
+        self.takable = tile
+        self.pile.append(tile)
+        

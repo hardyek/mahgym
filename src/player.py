@@ -13,7 +13,6 @@ class Player:
 
     def discard(self, tile: int) -> int:
         self.hand.remove(tile)
-        return tile
     
     def reveal_meld(self, meld: List[int]):
         for tile in meld:
