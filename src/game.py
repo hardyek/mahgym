@@ -44,54 +44,75 @@ class MahjongGame:
         self.wind_round: int = 0
 
         self.current_player: int = 0
-        self.last_discarder: int = 0
-
+        self.next_player: int = 0
         self.game_over: bool = False
         self.winner: Optional[int] = None
         self.winning_score: int = 0
 
+    #
+    # Initialise a game
+    #
     def initialise_game(self):
         # Shuffle the deck
         random.shuffle(self.deck)
         # Roll the 3 dice
         self.dice_roll = random.randint(3,18)
         # Calculate the starting player
-        self.starting_player = self.roller + (self.dice_roll % 4 - 1) - 1
+        self.starting_player = (self.roller + (self.dice_roll - 1)) % 4
         # Sync this value to be the player who's turn it is
         self.current_player = self.starting_player
+        self.next_player = (self.current_player + 1) % 4
+
         # Deal the starting hands
-        self.deal_starting_hands()
+        def deal_starting_hands():
+            # Deals 14 tiles to the starting player
+            # and 13 to the other three player
+            # removing them from the deck in the process
+            for i, player in enumerate(self.players):
+                if i == self.starting_player:
+                    for _ in range(14):
+                        tile = self.deck.pop(0)
+                        player.hand.append(tile)
+                else:
+                    for _ in range(13):
+                        tile = self.deck.pop(0)
+                        player.hand.append(tile)
+        deal_starting_hands()
+
         # Assign winds to players
-        self.assign_winds()
+        def assign_winds():
+            # Assigns winds to players based on the starting player
+            for i in range(4):
+                self.players[(self.starting_player + i) % 4].wind = i
+        assign_winds()
+
         # Expose specials and redraw
-        self.expose_redraw_specials()
+        def expose_redraw_specials():
+            # Add any specials to the specials array for the player and redraw from back of the deck
+            special_encodings = [35, 36, 37, 38, 39, 40, 41, 42]
+            for player in self.players:
+                for i in range(len(player.hand)):
+                    if player.hand[i] in special_encodings:
+                        player.specials.append(player.hand[i])
+                        # Technically it doesn't really matter where this tile is drawn from but whatever
+                        # Good to stick to the rules i guess
+                        player.hand[i] = self.deck.pop(-1)
+        expose_redraw_specials()
 
-    def deal_starting_hands(self):
-        # Deals 14 tiles to the starting player
-        # and 13 to the other three player
-        # removing them from the deck in the process
-        for i, player in enumerate(self.players):
-            if i == self.starting_player:
-                for _ in range(14):
-                    tile = self.deck.pop(0)
-                    player.hand.append(tile)
-            else:
-                for _ in range(13):
-                    tile = self.deck.pop(0)
-                    player.hand.append(tile)
+    #
+    # Gameplay
+    #
+    
 
-    def assign_winds(self):
-        # Assigns winds to players based on the starting player
-        for i in range(4):
-            self.players[(self.starting_player + i) % 4].wind = i
 
-    def expose_redraw_specials(self):
-        # Add any specials to the specials array for the player and redraw from back of the deck
-        special_encodings = [35, 36, 37, 38, 39, 40, 41, 42]
-        for player in self.players:
-            for i in range(len(player.hand)):
-                if player.hand[i] in special_encodings:
-                    player.specials.append(player.hand[i])
-                    # Technically it doesn't really matter where this tile is drawn from but whatever
-                    # Good to stick to the rules i guess
-                    player.hand[i] = self.deck.pop(-1)
+    #
+    # Postgame 
+    #
+
+    #
+    # Utility functions
+    #
+    def increment_player(self):
+        # Increments the current and next players in a counter clockwise motion
+        self.current_player = (self.current_player + 1) % 4
+        self.next_player = (self.next_player + 1) % 4

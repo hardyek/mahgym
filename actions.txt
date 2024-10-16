@@ -1,41 +1,10 @@
------------------------------------------------------------------------------
-Stage 1 - Pick Up
------------------------------------------------------------------------------
-Draw
+Turn Process
 
-- A player is dealt a tile from the front of the Deck
+1. 14 Tile Player Discards
+2. Calculate all possible Pong/Kong/Chow/Hu
+    - If Hu is possible end game (an agent has won)
+3. Iterate over each agent that can make a move in order of priority and ask them if they want to make that action or not.
+    1. If so then process that action (that agent will end up with 14 tiles)
+    2. If not then move play counter clockwise and draw from deck (agent ends up with 14 tiles)
+4. Repeat
 
-Draw Special
-
-- A player is dealt a tile from the back of the Deck 
-(i.e they they drew a flower or seasons  from back or they completed a kong)
-
-Pong
-
-- A player picks up Pile[-1] and completes a Pong revealing it to other players.
-
-Chow
-
-- A player picks up Pile[-1] and completes a Chow revealing it to other players.
-
-Kong
-
-1. A player picks up Pile[-1] to complete a Kong and reveals it to other players.
-
-2. A player draws a tile to complete a Kong and reveals it to other players.
-
-- A player Draws Special to make up for the extra tile lost.
-
------------------------------------------------------------------------------
-Stage 2 - Win? (Not an actionable stage)
------------------------------------------------------------------------------
-
-If a player has completed a winning set end the game etc...
-
------------------------------------------------------------------------------
-Stage 3 - Discard
------------------------------------------------------------------------------
-
-Discard
-
-- A player discards a tile from their hand into the pile
