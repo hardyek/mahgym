@@ -11,7 +11,7 @@ class Player:
     def recieve(self, tile: int):
         self.hand.append(tile)
 
-    def discard(self, tile: int) -> int:
+    def discard(self, tile: int):
         self.hand.remove(tile)
     
     def reveal_meld(self, meld: List[int]):

@@ -13,11 +13,11 @@ Encoding : Description              : Shorthand
 33       : Green                    : dg
 34       : Red                      : dr
 
-35       : 1 East (Plum Blossom)    : 1f
-36       : 2 South (Orchid)         : 2f
-37       : 3 West (Chrysanthemum)   : 3f
-38       : 4 North (Bamboo)         : 4f
-39       : 1 East (Spring)          : 1s
-40       : 2 South (Summer)         : 2s
-41       : 3 West (Autumn)          : 3s
-42       : 4 North (Winter)         : 4s
+35       : 1 East (Plum Blossom)    : f1e
+36       : 2 South (Orchid)         : f2s
+37       : 3 West (Chrysanthemum)   : f3w
+38       : 4 North (Bamboo)         : f4n
+39       : 1 East (Spring)          : s1e
+40       : 2 South (Summer)         : s2s
+41       : 3 West (Autumn)          : s3w
+42       : 4 North (Winter)         : s4n

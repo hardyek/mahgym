@@ -98,10 +98,17 @@ class MahjongGame:
     def make_action_pickup(self, action):
         if action == 0:
             self.draw()
+        if action == 1:
+            ... # Pong
+        if action == 2:
+            ... # Chow
+        if action == 3:
+            ... # Kong
+        if action == 4:
+            ... # Hu
 
     def make_action_discard(self, action):
         self.discard(action)
-
 
     def draw(self):
         # Take tile from front of the deck
@@ -109,9 +116,25 @@ class MahjongGame:
         # Add it to players hand
         self.players[self.current_player].recieve(tile)
 
+    def draw_special(self):
+        # Take tile from the back of the deck
+        tile = self.deck.pop(-1)
+        # Add it to players hand
+        self.players[self.current_player].recieve(tile)
+
     def discard(self, tile):
-        # Discard tile from players hand to the pile (also now the takable tile).
+        # Discard tile from players hand to the pile (also now the takable tile)
         self.players[self.current_player].discard(tile)
         self.takable = tile
         self.pile.append(tile)
-        
+    
+    def turn(self):
+        # Turn body
+        pickup_action = ... # Placeholder for pickup action logic
+        self.make_action_pickup(pickup_action)
+        discard_action = ... # Placeholder for discard action logic
+        self.make_action_discard(discard_action)
+        # Setting up for next players turn
+        self.current_player += 1
+
+
