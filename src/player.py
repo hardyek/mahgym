@@ -4,7 +4,7 @@ class Player:
     def __init__(self, seat : int):
         self.seat = seat
         self.hand: List[int] = []
-        self.exposed: List[int] = []
+        self.exposed: List[List[int]] = []
         self.specials: List[int] = []
         self.wind: int = ""
 
@@ -17,4 +17,4 @@ class Player:
     def reveal_meld(self, meld: List[int]):
         for tile in meld:
             self.hand.remove(tile)
-            self.exposed.append(tile)
+        self.exposed.append(meld)
