@@ -148,7 +148,7 @@ class MahjongGame:
         if action == 0: # Draw
             return True # Drawing will always be a legal move (if deck is empty game will draw not the players fault)
         if action == 1: # Pong
-            ... # Pong
+            ... # Pong
         if action == 2:
             ... # Chow
         if action == 3:
