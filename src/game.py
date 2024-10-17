@@ -98,6 +98,7 @@ class MahjongGame:
                         # Good to stick to the rules i guess
                         player.hand[i] = self.deck.pop(-1)
         expose_redraw_specials()
+        self.sort_hands()
 
     #
     # Gameplay
@@ -116,3 +117,7 @@ class MahjongGame:
         # Increments the current and next players in a counter clockwise motion
         self.current_player = (self.current_player + 1) % 4
         self.next_player = (self.next_player + 1) % 4
+
+    def sort_hands(self):
+        for player in self.players:
+            player.hand.sort()
