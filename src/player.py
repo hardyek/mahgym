@@ -4,7 +4,8 @@ class Player:
     def __init__(self, seat : int):
         self.seat = seat
         self.hand: List[int] = []
-        self.exposed: List[List[int]] = []
+        self.exposed_melds: List[List[int]] = []
+        self.concealed_melds: List[List[int]] = []
         self.specials: List[int] = []
         self.wind: int = ""
 

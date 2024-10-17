@@ -8,3 +8,14 @@ Turn Process
     2. If not then move play counter clockwise and draw from deck (agent ends up with 14 tiles)
 4. Repeat
 
+Achieved by:
+
+New Player property:
+
+concealed_melds = list of all melds currently held by player
+
+To check a win we need to check if there is a set of concealed_melds (sets of 3) that make up 12 tiles and the two remaining tiles in the hand make a pair
+
+there should be a function that operates on a players hand "makes_new_meld(tile)" that checks if a tile makes a new meld (Bool) this can be done to check which moves are possible.
+
+possible subdivision between pong,kong and chow for turn ordering
