@@ -37,6 +37,10 @@ class MahjongGame:
         self.pile: List[int] = []
         self.takable: Optional[int] = None
 
+        self.chows = [(i, i+1, i+2) for i in range(1, 8)] + \
+        [(i, i+1, i+2) for i in range(10, 17)] + \
+        [(i, i+1, i+2) for i in range(19, 26)]
+
         self.roller: int = previous_winner
         self.dice_roll: int = 0
         self.starting_player: int = None
@@ -44,7 +48,7 @@ class MahjongGame:
         self.wind_round: int = 0
 
         self.current_player: int = 0
-        self.next_player: int = 0
+
         self.game_over: bool = False
         self.winner: Optional[int] = None
         self.winning_score: int = 0
@@ -103,20 +107,96 @@ class MahjongGame:
     #
     # Gameplay
     #
+    def play_turn(self):
+        # It starts with the current player discarding a tile
+        discard_action = int(input(f"Enter discard action {self.players[self.current_player].hand}")) # Placeholder (use current player)
+        self.discard(discard_action)
+
+        interupt_stack = self.build_interupt_stack(self.takable)
+
+        interupt_stack = list(dict.fromkeys(interupt_stack)) # Remove duplicates (sometimes there are mutliple chows that can be made from the same tile)
+
+        print(interupt_stack)
+
+        pickup_action = -1
+
+        for item in interupt_stack:
+            # Process the action 
+            pickup_action = int(input(f"Enter pickup action for {item[0],self.takable, self.players[item[0]].hand}")) # Placeholder (use current player)
+
+
+            if pickup_action == 1:
+                self.players[self.current_player].recieve(self.takable)
+                self.current_player = item[0]
+                break
+        
+        if pickup_action == -1:
+            self.current_player = (self.current_player + 1) % 4
+            self.draw()
+
+    #
+    # Gameplay Helper Functions
+    #
+    def draw(self):
+        # Take tile from front of the deck
+        tile = self.deck.pop(0)
+        # Check for special cases
+        while tile >= 35 or self.players[self.current_player].hand.count(tile) == 4:
+            if tile >= 35: # Special tile (flower or season)
+                self.players[self.current_player].specials.append(tile)
+                tile = self.deck.pop(-1) # Draw from the back of the deck
+            elif self.players[self.current_player].hand.count(tile) == 4: # Concealed Kong
+                meld = [tile] * 4 # Create the Kong meld
+                self.players[self.current_player].reveal_meld(meld)
+                tile = self.deck.pop(-1) # Draw from the back of the deck
+        # Add non special tile to players hand
+        self.players[self.current_player].recieve(tile)
+
+    def discard(self,action):
+        tile = self.players[self.current_player].discard(action)
+        self.takable = tile
+
+    def build_interupt_stack(self,tile):
+        # Build the stack of actions that could occur
+        interupt_stack = self.check_for_pong_or_kong(tile) + self.check_for_chow(tile)
+        return interupt_stack
+
+    def check_for_pong_or_kong(self,tile):
+        interupt_stack = []
+        next_player = (self.current_player + 1) % 4
+
+        while next_player != self.current_player:
+            # Count the same tiles already in the players hand
+            tiles_in_hand = self.players[next_player].hand.count(tile)
+            if tiles_in_hand == 2:
+                interupt_stack.append([next_player,0]) # 0 for Pong
+            elif tiles_in_hand == 3:
+                interupt_stack.append([next_player,1]) # 1 for Kong
+            # Increment to the next player
+            next_player = (next_player + 1) % 4
+
+        return interupt_stack
     
+    def check_for_chow(self,tile):
+        interupt_stack = []
+        next_player = (self.current_player + 1) % 4
+        # Create a temporary array contaning the deck with the takable tile
+        hand_with_tile = self.players[next_player].hand + [tile]
+
+        # Check for possible chows
+        for chow in self.chows:
+            if tile in chow:
+                if all(t in hand_with_tile for t in chow):
+                    interupt_stack.append([next_player,2])
+
+        return interupt_stack
+
+
 
 
     #
     # Postgame 
     #
-
-    #
-    # Utility functions
-    #
-    def increment_player(self):
-        # Increments the current and next players in a counter clockwise motion
-        self.current_player = (self.current_player + 1) % 4
-        self.next_player = (self.next_player + 1) % 4
 
     def sort_hands(self):
         for player in self.players:
