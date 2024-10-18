@@ -1,3 +1,5 @@
+TILES
+
 Encoding : Description              : Shorthand
 
 1-9      : Numbers 1-9              : n1-9
@@ -21,3 +23,9 @@ Encoding : Description              : Shorthand
 40       : 2 South (Summer)         : s2s
 41       : 3 West (Autumn)          : s3w
 42       : 4 North (Winter)         : s4n
+
+ACTIONS 
+
+0       : Pong                      : p
+1       : Kong                      : k
+2       : Chow                      : c

@@ -114,8 +114,6 @@ class MahjongGame:
 
         interupt_stack = self.build_interupt_stack(self.takable)
 
-        interupt_stack = list(dict.fromkeys(interupt_stack)) # Remove duplicates (sometimes there are mutliple chows that can be made from the same tile)
-
         print(interupt_stack)
 
         pickup_action = -1
@@ -124,9 +122,15 @@ class MahjongGame:
             # Process the action 
             pickup_action = int(input(f"Enter pickup action for {item[0],self.takable, self.players[item[0]].hand}")) # Placeholder (use current player)
 
-
             if pickup_action == 1:
                 self.players[self.current_player].recieve(self.takable)
+                if item[1] == 0: # Pong
+                    self.players[self.current_player].reveal_meld([self.takable] * 3)
+                elif item[1] == 1: # Kong
+                    self.players[self.current_player].reveal_meld([self.takable] * 4)
+                elif item[1] == 2: # Chow
+                    self.players[self.current_player].reveal_meld(item[2])
+                
                 self.current_player = item[0]
                 break
         
@@ -146,8 +150,7 @@ class MahjongGame:
                 self.players[self.current_player].specials.append(tile)
                 tile = self.deck.pop(-1) # Draw from the back of the deck
             elif self.players[self.current_player].hand.count(tile) == 4: # Concealed Kong
-                meld = [tile] * 4 # Create the Kong meld
-                self.players[self.current_player].reveal_meld(meld)
+                self.players[self.current_player].reveal_meld([tile] * 4)
                 tile = self.deck.pop(-1) # Draw from the back of the deck
         # Add non special tile to players hand
         self.players[self.current_player].recieve(tile)
@@ -187,15 +190,16 @@ class MahjongGame:
         for chow in self.chows:
             if tile in chow:
                 if all(t in hand_with_tile for t in chow):
-                    interupt_stack.append([next_player,2])
+                    interupt_stack.append([next_player,2,chow])
 
         return interupt_stack
 
-
-
-
     #
     # Postgame 
+    #
+
+    #
+    # Utility
     #
 
     def sort_hands(self):
