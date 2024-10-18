@@ -5,7 +5,7 @@ from src.game import MahjongGame
 from src.utils import array_to_shorthand
 
 class MahjongRenderer:
-    def __init__(self, screen_width: int = 1360, screen_height: int = 600):
+    def __init__(self, screen_width: int = 1400, screen_height: int = 600):
         pygame.init()
         self.screen = pygame.display.set_mode((screen_width, screen_height))
         pygame.display.set_caption("Mahgym")
