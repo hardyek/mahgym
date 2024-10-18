@@ -123,23 +123,22 @@ class MahjongGame:
 
         pickup_action = -1
 
-        if len(interupt_stack) > 0:
-            for item in interupt_stack:
-                # Process the action 
-                pickup_action = int(input(f"Enter pickup action for {item[0],self.takable, self.players[item[0]].hand}")) # Placeholder (use current player)
+        for item in interupt_stack:
+            # Process the action 
+            pickup_action = int(input(f"Enter pickup action for {item[0],self.takable, self.players[item[0]].hand}")) # Placeholder (use current player)
 
-                if pickup_action == 1:
-                    self.current_player = item[0]
-                    self.players[self.current_player].recieve(self.takable)
+            if pickup_action == 1:
+                self.current_player = item[0]
+                self.players[self.current_player].recieve(self.takable)
 
-                    if item[1] == 0: # Pong
-                        self.players[self.current_player].reveal_meld([self.takable] * 3)
-                    elif item[1] == 1: # Kong
-                        self.players[self.current_player].reveal_meld([self.takable] * 4)
-                    elif item[1] == 2: # Chow
-                        self.players[self.current_player].reveal_meld(item[2])
-                    
-                    break
+                if item[1] == 0: # Pong
+                    self.players[self.current_player].reveal_meld([self.takable] * 3)
+                elif item[1] == 1: # Kong
+                    self.players[self.current_player].reveal_meld([self.takable] * 4)
+                elif item[1] == 2: # Chow
+                    self.players[self.current_player].reveal_meld(item[2])
+                
+                break
         
         if pickup_action == -1 or pickup_action == 0:
             self.current_player = (self.current_player + 1) % 4

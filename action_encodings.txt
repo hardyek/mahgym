@@ -1,5 +1,0 @@
-Actions
-
-0 Pong
-1 Kong
-2 Chow
