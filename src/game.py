@@ -95,18 +95,14 @@ class MahjongGame:
             
             def check_specials(hand):
                 for item in hand:
-                    if item in special_encodings:
+                    if item >= 35:
                         return True
-                    else:
-                        return False
-
-            # Add any specials to the specials array for the player and redraw from back of the deck
-            special_encodings = [35, 36, 37, 38, 39, 40, 41, 42]
+                return False
 
             for player in self.players:
                 while check_specials(player.hand):
                     for i in range(len(player.hand)):
-                        if player.hand[i] in special_encodings:
+                        if player.hand[i] >= 35:
                             player.specials.append(player.hand[i])
                             # Technically it doesn't really matter where this tile is drawn from but whatever
                             # Good to stick to the rules i guess
