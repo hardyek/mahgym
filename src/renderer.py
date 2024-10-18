@@ -5,24 +5,24 @@ from src.game import MahjongGame
 from src.utils import array_to_shorthand
 
 class MahjongRenderer:
-    def __init__(self, screen_width: int = 1024, screen_height: int = 768):
+    def __init__(self, screen_width: int = 1240, screen_height: int = 600):
         pygame.init()
         self.screen = pygame.display.set_mode((screen_width, screen_height))
         pygame.display.set_caption("Mahgym")
         
-        self.tile_width = 40
-        self.tile_height = 60
-        self.padding = 5
-        self.box_size = max(self.tile_width, self.tile_height) + self.padding
+        self.tile_width = 50 * 1.3
+        self.tile_height = 61 * 1.3
+        self.padding = 2
 
         self.tile_images: Dict[int, pygame.Surface] = self.load_tile_images()
-        self.font = pygame.font.Font(None, 36)
+        self.font = pygame.font.SysFont ("Helvetica", 24)
 
         self.colors = {
-            'background': (255, 255, 255),  # White
-            'box': (200, 200, 200),  # Light gray
+            'background': (255,255,255),
+            'box': (255,255,255),
+            'text': (0,0,0),
             'exposed_meld': (230, 230, 250),  # Lavender
-            'current_player': (255, 192, 203),  # Pink
+            'current_player': (214, 67, 214),  # Pink
             'takable': (144, 238, 144)  # Light green
         }
 
@@ -45,36 +45,37 @@ class MahjongRenderer:
 
     def render_players(self, players: List[Player], current_player: int):
         for i, player in enumerate(players):
-            player_y = i * (self.box_size + self.padding)
-            player_color = self.colors['current_player'] if i == current_player else self.colors['background']
-            pygame.draw.rect(self.screen, player_color, (0, player_y, 50, self.box_size))
-            self.screen.blit(self.font.render(f"P{i}", True, (0, 0, 0)), (10, player_y + 10))
+            player_y = i * (self.tile_height + self.padding)
+            player_color = self.colors['current_player'] if i == current_player else self.colors['text']
+            pygame.draw.rect(self.screen, self.colors['box'], (0, player_y, self.tile_width, self.tile_height))
+            self.screen.blit(self.font.render(f"P{i}", True, (player_color)), (10, player_y + 10))
             
-            self.render_hand(player.hand, 60, player_y, player.exposed_melds)
+            self.render_hand(player.hand, self.tile_width, player_y, player.exposed_melds)
 
     def render_hand(self, hand: List[int], x: int, y: int, exposed_melds: List[List[int]]):
         exposed_tiles = [tile for meld in exposed_melds for tile in meld]
         for i, tile in enumerate(hand):
-            tile_x = x + i * self.box_size
+            tile_x = x + i * self.tile_width
             box_color = self.colors['exposed_meld'] if tile in exposed_tiles else self.colors['box']
-            pygame.draw.rect(self.screen, box_color, (tile_x, y, self.box_size, self.box_size))
-            self.screen.blit(self.tile_images[tile], (tile_x + self.padding // 2, y + self.padding // 2))
+            pygame.draw.rect(self.screen, box_color, (tile_x, y, self.tile_width, self.tile_height))
+            self.screen.blit(self.tile_images[tile], (tile_x, y))
 
     def render_deck(self, deck: List[int]):
-        deck_y = 5 * (self.box_size + self.padding)
-        self.screen.blit(self.font.render("Deck", True, (0, 0, 0)), (10, deck_y - 30))
-        for i, tile in enumerate(deck[:10]):  # Show next 10 tiles
-            tile_x = i * self.box_size
-            pygame.draw.rect(self.screen, self.colors['box'], (tile_x, deck_y, self.box_size, self.box_size))
+        deck_y = 4.5 * (self.tile_height + self.padding)
+        self.screen.blit(self.font.render("Deck", True, (self.colors["text"])), (10, deck_y - 30))
+        for i, tile in enumerate(deck[:15]):  # Show next 10 tiles
+            tile_x = i * self.tile_width
+            pygame.draw.rect(self.screen, self.colors['box'], (tile_x, deck_y, self.tile_width, self.tile_height))
+            self.screen.blit(self.tile_images[tile], (tile_x, deck_y))
 
     def render_discard_pile(self, pile: List[int], takable: int):
-        pile_y = 6 * (self.box_size + self.padding)
-        self.screen.blit(self.font.render("Pile", True, (0, 0, 0)), (10, pile_y - 30))
+        pile_y = 6 * (self.tile_height + self.padding)
+        self.screen.blit(self.font.render("Pile", True, (self.colors["text"])), (10, pile_y - 30))
         for i, tile in enumerate(reversed(pile[-10:])):  # Show last 10 tiles in reverse order
-            tile_x = i * self.box_size
+            tile_x = i * self.tile_width
             box_color = self.colors['takable'] if i == 0 and tile == takable else self.colors['box']
-            pygame.draw.rect(self.screen, box_color, (tile_x, pile_y, self.box_size, self.box_size))
-            self.screen.blit(self.tile_images[tile], (tile_x + self.padding // 2, pile_y + self.padding // 2))
+            pygame.draw.rect(self.screen, box_color, (tile_x, pile_y, self.tile_width, self.tile_height))
+            self.screen.blit(self.tile_images[tile], (tile_x, pile_y))
 
     def handle_events(self):
         for event in pygame.event.get():
