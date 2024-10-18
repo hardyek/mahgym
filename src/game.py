@@ -169,6 +169,60 @@ class MahjongGame:
         self.takable = tile
         self.pile.append(tile)
 
+    def check_for_hu(self,player,tile):
+        temp_hand = player.hand + [tile]
+        if self.is_winning_hand(temp_hand,player.exposed):
+            return player.seat
+        else:
+            return -1
+        
+    def is_winning_hand(self, hand, exposed):
+        sorted_hand = hand.sort()
+        for tile in set(sorted_hand): # Check all possible pairs
+            if sorted_hand.count(tile) >= 2: 
+                # [:] Creates a copy of the list
+                remaining = sorted_hand[:]
+                remaining.remove(tile)
+                remaining.remove(tile)
+                if self.can_form_four_sets(remaining,exposed):
+                    return True
+        return False
+
+    def can_form_four_sets(self, hand, exposed):
+        sets_to_form = 4 - len(exposed)
+
+        hand = hand.sort()
+
+        stack = [(hand, 0)]
+
+        while stack:
+            current_hand, formed_sets = stack.pop()
+            if formed_sets == sets_to_form:
+                return True
+            
+            if not current_hand:
+                continue
+            
+            # Try to form a triplet
+            if len(current_hand) >= 3 and current_hand[0] == current_hand[1] == current_hand[2]:
+                new_hand = current_hand[3:]
+                stack.append((new_hand, formed_sets + 1))
+            
+            # Try to form a sequence
+            if len(current_hand) >= 3:
+                if current_hand[0] + 1 in current_hand and current_hand[0] + 2 in current_hand:
+                    new_hand = current_hand[:]
+                    new_hand.remove(current_hand[0])
+                    new_hand.remove(current_hand[0] + 1)
+                    new_hand.remove(current_hand[0] + 2)
+                    stack.append((new_hand, formed_sets + 1))
+        
+        # If we've exhausted all possibilities without returning True, it's not possible
+        return False
+    
+        
+
+
     def build_interupt_stack(self,tile):
         # Build the stack of actions that could occur
         interupt_stack = self.check_for_pong_or_kong(tile) + self.check_for_chow(tile)
