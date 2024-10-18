@@ -169,6 +169,7 @@ class MahjongGame:
     def discard(self,action):
         tile = self.players[self.current_player].discard(action)
         self.takable = tile
+        self.pile.append(tile)
 
     def build_interupt_stack(self,tile):
         # Build the stack of actions that could occur
