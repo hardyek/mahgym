@@ -5,7 +5,7 @@ from src.game import MahjongGame
 from src.utils import array_to_shorthand
 
 class MahjongRenderer:
-    def __init__(self, screen_width: int = 1240, screen_height: int = 600):
+    def __init__(self, screen_width: int = 1360, screen_height: int = 600):
         pygame.init()
         self.screen = pygame.display.set_mode((screen_width, screen_height))
         pygame.display.set_caption("Mahgym")
@@ -23,6 +23,7 @@ class MahjongRenderer:
             'text': (0,0,0),
             'exposed_meld': (230, 230, 250),  # Lavender
             'current_player': (214, 67, 214),  # Pink
+            'current_player_background': (240, 240, 240),
             'takable': (144, 238, 144)  # Light green
         }
 
@@ -46,11 +47,13 @@ class MahjongRenderer:
     def render_players(self, players: List[Player], current_player: int):
         for i, player in enumerate(players):
             player_y = i * (self.tile_height + self.padding)
-            player_color = self.colors['current_player'] if i == current_player else self.colors['text']
-            pygame.draw.rect(self.screen, self.colors['box'], (0, player_y, self.tile_width, self.tile_height))
-            self.screen.blit(self.font.render(f"P{i}", True, (player_color)), (10, player_y + 10))
+            player_color_background = self.colors['current_player_background'] if i == current_player else self.colors['background']
+            player_color_text = self.colors['current_player'] if i == current_player else self.colors['text']
+            pygame.draw.rect(self.screen, player_color_background, (0, player_y, self.tile_width, self.tile_height))
+            self.screen.blit(self.font.render(f"P{i}", True, (player_color_text)), (10, player_y + 10))
             
             self.render_hand(player.hand, self.tile_width, player_y, player.exposed_melds)
+            self.render_specials(player.specials, player_y)
 
     def render_hand(self, hand: List[int], x: int, y: int, exposed_melds: List[List[int]]):
         exposed_tiles = [tile for meld in exposed_melds for tile in meld]
@@ -58,6 +61,13 @@ class MahjongRenderer:
             tile_x = x + i * self.tile_width
             box_color = self.colors['exposed_meld'] if tile in exposed_tiles else self.colors['box']
             pygame.draw.rect(self.screen, box_color, (tile_x, y, self.tile_width, self.tile_height))
+            self.screen.blit(self.tile_images[tile], (tile_x, y))
+
+    def render_specials(self, specials: List[Player], y: int):
+        specials_x = 16 * self.tile_width  # Start right after the deck
+        for i, tile in enumerate(specials):
+            tile_x = specials_x + i * self.tile_width
+            pygame.draw.rect(self.screen, self.colors["box"], (tile_x, y, self.tile_width, self.tile_height))
             self.screen.blit(self.tile_images[tile], (tile_x, y))
 
     def render_deck(self, deck: List[int]):

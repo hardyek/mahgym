@@ -92,16 +92,27 @@ class MahjongGame:
 
         # Expose specials and redraw
         def expose_redraw_specials():
+            
+            def check_specials(hand):
+                for item in hand:
+                    if item in special_encodings:
+                        return True
+                    else:
+                        return False
+
             # Add any specials to the specials array for the player and redraw from back of the deck
             special_encodings = [35, 36, 37, 38, 39, 40, 41, 42]
+
             for player in self.players:
-                for i in range(len(player.hand)):
-                    if player.hand[i] in special_encodings:
-                        player.specials.append(player.hand[i])
-                        # Technically it doesn't really matter where this tile is drawn from but whatever
-                        # Good to stick to the rules i guess
-                        player.hand[i] = self.deck.pop(-1)
+                while check_specials(player.hand):
+                    for i in range(len(player.hand)):
+                        if player.hand[i] in special_encodings:
+                            player.specials.append(player.hand[i])
+                            # Technically it doesn't really matter where this tile is drawn from but whatever
+                            # Good to stick to the rules i guess
+                            player.hand[i] = self.deck.pop(-1)
         expose_redraw_specials()
+
         self.sort_hands()
 
     #
