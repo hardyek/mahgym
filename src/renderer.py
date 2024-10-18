@@ -81,7 +81,7 @@ class MahjongRenderer:
     def render_discard_pile(self, pile: List[int], takable: int):
         pile_y = 6 * (self.tile_height + self.padding)
         self.screen.blit(self.font.render("Pile", True, (self.colors["text"])), (10, pile_y - 30))
-        for i, tile in enumerate(reversed(pile[-10:])):  # Show last 10 tiles in reverse order
+        for i, tile in enumerate(reversed(pile[-15:])):  # Show last 10 tiles in reverse order
             tile_x = i * self.tile_width
             box_color = self.colors['takable'] if i == 0 and tile == takable else self.colors['box']
             pygame.draw.rect(self.screen, box_color, (tile_x, pile_y, self.tile_width, self.tile_height))

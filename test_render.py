@@ -1,7 +1,6 @@
 from src.renderer import MahjongRenderer
 import pygame
 from src.game import MahjongGame
-from src.utils import array_to_shorthand, index_to_wind
 
 renderer = MahjongRenderer()
 game = MahjongGame()
