@@ -17,7 +17,6 @@ while running:
     # Update game state here
     game.play_turn()
     renderer.render_game(game)
-    print(game.pile)
     
     clock.tick(15)  # Limit to 60 frames per second
 
