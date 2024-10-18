@@ -146,6 +146,9 @@ class MahjongGame:
             self.current_player = (self.current_player + 1) % 4
             self.draw()
 
+        # End the turn by sorting the hands (for rendering mainly)
+        self.sort_hands()
+
     #
     # Gameplay Helper Functions
     #
@@ -209,7 +212,6 @@ class MahjongGame:
     #
     # Utility
     #
-
     def sort_hands(self):
         for player in self.players:
             player.hand.sort()
