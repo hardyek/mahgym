@@ -6,18 +6,12 @@ renderer = MahjongRenderer()
 game = MahjongGame()
 game.initialise_game()
 
-running = True
 clock = pygame.time.Clock()
 
 renderer.render_game(game)
 
-while running:
-    running = renderer.handle_events()
-    
-    # Update game state here
-    game.play_turn()
-    renderer.render_game(game)
-    
-    clock.tick(15)  # Limit to 60 frames per second
+winner = game.game_loop_rendered(renderer,clock)
+
+print(f"Player {winner} has won.")
 
 pygame.quit()

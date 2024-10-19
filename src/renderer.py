@@ -53,7 +53,7 @@ class MahjongRenderer:
             pygame.draw.rect(self.screen, player_color_background, (0, player_y, self.tile_width, self.tile_height))
             self.screen.blit(self.font.render(f"P{i}", True, (player_color_text)), (10, player_y + 10))
             
-            self.render_hand(player.hand, self.tile_width, player_y, player.exposed_melds)
+            self.render_hand(player.hand, self.tile_width, player_y, player.exposed)
             self.render_specials(player.specials, player_y)
 
     def render_hand(self, hand: List[int], x: int, y: int, exposed_melds: List[List[int]]):

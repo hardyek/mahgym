@@ -114,11 +114,51 @@ class MahjongGame:
     #
     # Gameplay
     #
-    def play_turn(self):
+    def game_loop(self):
+        winner = self.check_if_winner() # Check for heavenly hand
+        # Check for heavenly hands
+        if winner == -1:
+            while True:
+                self.play_discard_turn()
+                winner = self.check_if_hu()
+                if winner != -1:
+                    break
+
+                self.play_pickup_turn()
+                winner = self.check_if_winner()
+                if winner != -1:
+                    break
+                if len(self.deck) == 0:
+                    break
+        return winner
+    
+    def game_loop_rendered(self, renderer, clock):
+        winner = self.check_if_winner() # Check for heavenly hand
+        running = True
+        # Check for heavenly hands
+        if winner == -1:
+            while running:
+                running = renderer.handle_events()
+                self.play_discard_turn()
+                winner = self.check_if_hu()
+                renderer.render_game(self)
+                if winner != -1:
+                    break
+
+                self.play_pickup_turn()
+                winner = self.check_if_winner()
+                renderer.render_game(self)
+                if winner != -1:
+                    break
+                clock.tick(15)
+        return winner
+
+    def play_discard_turn(self):
         # It starts with the current player discarding a tile
         discard_action = int(input(f"Enter discard action {self.players[self.current_player].hand}")) # Placeholder (use current player)
         self.discard(discard_action)
 
+    def play_pickup_turn(self):
         interupt_stack = self.build_interupt_stack(self.takable)
 
         pickup_action = -1
@@ -133,10 +173,13 @@ class MahjongGame:
 
                 if item[1] == 0: # Pong
                     self.players[self.current_player].reveal_meld([self.takable] * 3)
+                    self.pile.pop(-1) # Remove takable from the pile
                 elif item[1] == 1: # Kong
                     self.players[self.current_player].reveal_meld([self.takable] * 4)
+                    self.pile.pop(-1)
                 elif item[1] == 2: # Chow
                     self.players[self.current_player].reveal_meld(item[2])
+                    self.pile.pop(-1)
                 
                 break
         
@@ -144,7 +187,6 @@ class MahjongGame:
             self.current_player = (self.current_player + 1) % 4
             self.draw()
 
-        # End the turn by sorting the hands (for rendering mainly)
         self.sort_hands()
 
     #
@@ -169,15 +211,33 @@ class MahjongGame:
         self.takable = tile
         self.pile.append(tile)
 
-    def check_for_hu(self,player,tile):
-        temp_hand = player.hand + [tile]
-        if self.is_winning_hand(temp_hand,player.exposed):
-            return player.seat
+    def check_if_hu(self):
+        next_player = (self.current_player + 1) % 4
+        while next_player != self.current_player:
+            if self.check_for_hu(self.players[next_player], self.takable):
+                return next_player
+            
+            next_player = (next_player + 1) % 4
+        return -1
+
+    def check_if_winner(self):
+        if self.check_for_hu(self.players[self.current_player], -1):
+            return self.current_player
         else:
             return -1
+
+    def check_for_hu(self,player,tile):
+        if tile == -1:
+            temp_hand = player.hand
+        else:
+            temp_hand = player.hand + [tile]
+        if self.is_winning_hand(temp_hand,player.exposed):
+            return True
+        else:
+            return False
         
     def is_winning_hand(self, hand, exposed):
-        sorted_hand = hand.sort()
+        sorted_hand = sorted(hand)
         for tile in set(sorted_hand): # Check all possible pairs
             if sorted_hand.count(tile) >= 2: 
                 # [:] Creates a copy of the list
@@ -191,7 +251,7 @@ class MahjongGame:
     def can_form_four_sets(self, hand, exposed):
         sets_to_form = 4 - len(exposed)
 
-        hand = hand.sort()
+        hand = sorted(hand)
 
         stack = [(hand, 0)]
 
