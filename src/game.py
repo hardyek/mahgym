@@ -150,6 +150,8 @@ class MahjongGame:
                 renderer.render_game(self)
                 if winner != -1:
                     break
+                if len(self.deck) == 0:
+                    break
                 clock.tick(15)
         return winner
 
