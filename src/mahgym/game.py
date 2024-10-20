@@ -1,11 +1,12 @@
 from typing import List, Optional
 import random
 
-from src.player import Player
+from .player import Player
 
 class MahjongGame:
-    def __init__(self, previous_winner=random.randint(0,3)):
+    def __init__(self, agent_array, previous_winner=random.randint(0,3)):
         self.players: List[Player] = [Player(i) for i in range(4)]
+        self.agents = agent_array
 
         self.deck: List[int] = [
             1, 2, 3, 4, 5, 6, 7, 8, 9, # Numeric 1 - 9 
@@ -157,7 +158,7 @@ class MahjongGame:
 
     def play_discard_turn(self):
         # It starts with the current player discarding a tile
-        discard_action = int(input(f"Enter discard action {self.players[self.current_player].hand}")) # Placeholder (use current player)
+        discard_action = self.agents[self.current_player].make_discard(self.get_observations())
         self.discard(discard_action)
 
     def play_pickup_turn(self):
@@ -167,7 +168,7 @@ class MahjongGame:
 
         for item in interupt_stack:
             # Process the action 
-            pickup_action = int(input(f"Enter pickup action for {item[0],self.takable, self.players[item[0]].hand}")) # Placeholder (use current player)
+            pickup_action = self.agents[self.current_player].make_pickup(item,self.get_observations())
 
             if pickup_action == 1:
                 self.current_player = item[0]
@@ -330,3 +331,35 @@ class MahjongGame:
     def sort_hands(self):
         for player in self.players:
             player.hand.sort()
+
+    def other_players_exposed(self):
+        next_player = (self.current_player + 1) % 4
+        exposed_arrays = []
+        while next_player != self.current_player:
+            exposed_arrays.append(self.players[next_player].exposed)
+            next_player = (next_player + 1) % 4
+        return exposed_arrays
+
+    def other_players_specials(self):
+        next_player = (self.current_player + 1) % 4
+        exposed_arrays = []
+        while next_player != self.current_player:
+            exposed_arrays.append(self.players[next_player].specials)
+            next_player = (next_player + 1) % 4
+        return exposed_arrays
+
+    def get_observations(self):
+        player = self.players[self.current_player]
+
+        exposed = player.exposed
+        others_exposed = self.other_players_exposed()
+        specials = player.specials
+        others_specials = self.other_players_specials()
+
+        pile = self.pile
+        hand = player.hand
+        exposed = exposed + others_exposed
+        specials = specials + others_specials
+        wind = player.wind
+
+        return pile,hand,exposed,specials,wind

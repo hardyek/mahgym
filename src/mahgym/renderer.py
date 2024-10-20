@@ -1,8 +1,11 @@
 import pygame
 from typing import List, Dict
-from src.player import Player
-from src.game import MahjongGame
-from src.utils import array_to_shorthand
+from .player import Player
+from .game import MahjongGame
+from .utils import array_to_shorthand
+import os
+import pkg_resources
+
 
 class MahjongRenderer:
     def __init__(self, screen_width: int = 1400, screen_height: int = 600):
@@ -31,8 +34,10 @@ class MahjongRenderer:
     def load_tile_images(self) -> Dict[int, pygame.Surface]:
         tile_images = {}
         tile_encodings = array_to_shorthand(range(1, 43))
+        tile_path = pkg_resources.resource_filename('mahgym', 'tiles')
         for i, encoding in enumerate(tile_encodings):
-            image = pygame.image.load(f"tiles/{encoding}.png")
+            file_path = os.path.join(tile_path, f"{encoding}.png")
+            image = pygame.image.load(file_path)
             tile_images[i + 1] = pygame.transform.scale(image, (self.tile_width, self.tile_height))
         return tile_images
 
