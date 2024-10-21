@@ -117,24 +117,31 @@ class MahjongGame:
     #
     def game_loop(self):
         winner = self.check_if_winner() # Check for heavenly hand
+        winning_hand = self.players[winner].hand
+        running = True
         # Check for heavenly hands
         if winner == -1:
-            while True:
+            while running:
                 self.play_discard_turn()
                 winner = self.check_if_hu()
                 if winner != -1:
+                    winning_hand = self.players[winner].hand + [self.takable]
                     break
 
                 self.play_pickup_turn()
                 winner = self.check_if_winner()
                 if winner != -1:
+                    winning_hand = self.players[winner].hand
                     break
                 if len(self.deck) == 0:
+                    winning_hand = [-1] * 14
                     break
-        return winner
+                
+        return winner, winning_hand
     
     def game_loop_rendered(self, renderer, clock):
         winner = self.check_if_winner() # Check for heavenly hand
+        winning_hand = self.players[winner].hand
         running = True
         # Check for heavenly hands
         if winner == -1:
@@ -144,21 +151,25 @@ class MahjongGame:
                 winner = self.check_if_hu()
                 renderer.render_game(self)
                 if winner != -1:
+                    winning_hand = self.players[winner].hand + [self.takable]
                     break
 
                 self.play_pickup_turn()
                 winner = self.check_if_winner()
                 renderer.render_game(self)
                 if winner != -1:
+                    winning_hand = self.players[winner].hand
                     break
                 if len(self.deck) == 0:
+                    winning_hand = [-1] * 14
                     break
                 clock.tick(15)
-        return winner
+
+        return winner, winning_hand
 
     def play_discard_turn(self):
         # It starts with the current player discarding a tile
-        discard_action = self.agents[self.current_player].make_discard(self.get_observations())
+        discard_action = self.agents[self.current_player].make_discard(self.get_observations(),self.current_player)
         self.discard(discard_action)
 
     def play_pickup_turn(self):
@@ -168,7 +179,7 @@ class MahjongGame:
 
         for item in interupt_stack:
             # Process the action 
-            pickup_action = self.agents[self.current_player].make_pickup(item,self.get_observations())
+            pickup_action = self.agents[item[0]].make_pickup(item,self.get_observations(),item[0])
 
             if pickup_action == 1:
                 self.current_player = item[0]
