@@ -38,7 +38,7 @@ class MahjongGame:
         self.pile: List[int] = []
         self.takable: Optional[int] = None
 
-        self.chows = [(i, i+1, i+2) for i in range(1, 8)] + \
+        self.soengs = [(i, i+1, i+2) for i in range(1, 8)] + \
         [(i, i+1, i+2) for i in range(10, 17)] + \
         [(i, i+1, i+2) for i in range(19, 26)]
 
@@ -123,7 +123,7 @@ class MahjongGame:
         if winner == -1:
             while running:
                 self.play_discard_turn()
-                winner = self.check_if_hu()
+                winner = self.check_if_mahjong()
                 if winner != -1:
                     winning_hand = self.players[winner].hand + self.players[winner].exposed + [self.takable]
                     break
@@ -149,7 +149,7 @@ class MahjongGame:
             while running:
                 running = renderer.handle_events()
                 self.play_discard_turn()
-                winner = self.check_if_hu()
+                winner = self.check_if_mahjong()
                 renderer.render_game(self)
                 if winner != -1:
                     winning_hand = self.players[winner].hand + [self.takable] + self.players[winner].exposed
@@ -188,13 +188,13 @@ class MahjongGame:
                 self.current_player = item[0]
                 self.players[self.current_player].recieve(self.takable)
 
-                if item[1] == 0: # Pong
+                if item[1] == 0: # Pung
                     self.players[self.current_player].reveal_meld([self.takable] * 3)
                     self.pile.pop(-1) # Remove takable from the pile
-                elif item[1] == 1: # Kong
+                elif item[1] == 1: # Gong
                     self.players[self.current_player].reveal_meld([self.takable] * 4)
                     self.pile.pop(-1)
-                elif item[1] == 2: # Chow
+                elif item[1] == 2: # Soeng
                     self.players[self.current_player].reveal_meld(item[2])
                     self.pile.pop(-1)
                 
@@ -219,7 +219,7 @@ class MahjongGame:
             if tile >= 35: # Special tile (flower or season)
                 self.players[self.current_player].specials.append(tile)
                 tile = self.deck.pop(-1) # Draw from the back of the deck
-            elif self.players[self.current_player].hand.count(tile) == 3: # Concealed Kong
+            elif self.players[self.current_player].hand.count(tile) == 3: # Concealed Gong
                 self.players[self.current_player].reveal_meld([tile] * 4)
                 tile = self.deck.pop(-1) # Draw from the back of the deck
         # Add non special tile to players hand
@@ -230,22 +230,22 @@ class MahjongGame:
         self.takable = tile
         self.pile.append(tile)
 
-    def check_if_hu(self):
+    def check_if_mahjong(self):
         next_player = (self.current_player + 1) % 4
         while next_player != self.current_player:
-            if self.check_for_hu(self.players[next_player], self.takable):
+            if self.check_for_mahjong(self.players[next_player], self.takable):
                 return next_player
             
             next_player = (next_player + 1) % 4
         return -1
 
     def check_if_winner(self):
-        if self.check_for_hu(self.players[self.current_player], -1):
+        if self.check_for_mahjong(self.players[self.current_player], -1):
             return self.current_player
         else:
             return -1
 
-    def check_for_hu(self,player,tile):
+    def check_for_mahjong(self,player,tile):
         if tile == -1:
             temp_hand = player.hand
         else:
@@ -304,10 +304,10 @@ class MahjongGame:
 
     def build_interupt_stack(self,tile):
         # Build the stack of actions that could occur
-        interupt_stack = self.check_for_pong_or_kong(tile) + self.check_for_chow(tile)
+        interupt_stack = self.check_for_pung_or_gong(tile) + self.check_for_soeng(tile)
         return interupt_stack
 
-    def check_for_pong_or_kong(self,tile):
+    def check_for_pung_or_gong(self,tile):
         interupt_stack = []
         next_player = (self.current_player + 1) % 4
 
@@ -315,25 +315,25 @@ class MahjongGame:
             # Count the same tiles already in the players hand
             tiles_in_hand = self.players[next_player].hand.count(tile)
             if tiles_in_hand == 2:
-                interupt_stack.append([next_player,0]) # 0 for Pong
+                interupt_stack.append([next_player,0]) # 0 for Pung
             elif tiles_in_hand == 3:
-                interupt_stack.append([next_player,1]) # 1 for Kong
+                interupt_stack.append([next_player,1]) # 1 for Gong
             # Increment to the next player
             next_player = (next_player + 1) % 4
 
         return interupt_stack
     
-    def check_for_chow(self,tile):
+    def check_for_soeng(self,tile):
         interupt_stack = []
         next_player = (self.current_player + 1) % 4
         # Create a temporary array contaning the deck with the takable tile
         hand_with_tile = self.players[next_player].hand + [tile]
 
-        # Check for possible chows
-        for chow in self.chows:
-            if tile in chow:
-                if all(t in hand_with_tile for t in chow):
-                    interupt_stack.append([next_player,2,chow])
+        # Check for possible soengs
+        for soeng in self.soengs:
+            if tile in soeng:
+                if all(t in hand_with_tile for t in soeng):
+                    interupt_stack.append([next_player,2,soeng])
 
         return interupt_stack
 

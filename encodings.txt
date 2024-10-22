@@ -26,6 +26,6 @@ Encoding : Description              : Shorthand
 
 ACTIONS 
 
-0       : Pong                      : p
-1       : Kong                      : k
-2       : Chow                      : c
+0       : Pung                      : p
+1       : Gong                      : k
+2       : Soeng                      : c
