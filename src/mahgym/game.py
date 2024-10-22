@@ -125,18 +125,19 @@ class MahjongGame:
                 self.play_discard_turn()
                 winner = self.check_if_hu()
                 if winner != -1:
-                    winning_hand = self.players[winner].hand + [self.takable]
+                    winning_hand = self.players[winner].hand + self.players[winner].exposed + [self.takable]
+                    break
+                
+                if len(self.deck) == 0:
+                    winning_hand = [-1] * 14
                     break
 
                 self.play_pickup_turn()
                 winner = self.check_if_winner()
                 if winner != -1:
-                    winning_hand = self.players[winner].hand
+                    winning_hand = self.players[winner].hand + self.players[winner].exposed
                     break
-                if len(self.deck) == 0:
-                    winning_hand = [-1] * 14
-                    break
-                
+        
         return winner, winning_hand
     
     def game_loop_rendered(self, renderer, clock):
@@ -151,19 +152,21 @@ class MahjongGame:
                 winner = self.check_if_hu()
                 renderer.render_game(self)
                 if winner != -1:
-                    winning_hand = self.players[winner].hand + [self.takable]
+                    winning_hand = self.players[winner].hand + [self.takable] + self.players[winner].exposed
+                    break
+
+                if len(self.deck) == 0:
+                    winning_hand = [-1] * 14
                     break
 
                 self.play_pickup_turn()
                 winner = self.check_if_winner()
                 renderer.render_game(self)
                 if winner != -1:
-                    winning_hand = self.players[winner].hand
+                    winning_hand = self.players[winner].hand + self.players[winner].exposed
                     break
-                if len(self.deck) == 0:
-                    winning_hand = [-1] * 14
-                    break
-                clock.tick(15)
+
+                clock.tick(10) # 10 FPS           
 
         return winner, winning_hand
 
@@ -210,11 +213,13 @@ class MahjongGame:
         # Take tile from front of the deck
         tile = self.deck.pop(0)
         # Check for special cases
-        while tile >= 35 or self.players[self.current_player].hand.count(tile) == 4:
+        while tile >= 35 or self.players[self.current_player].hand.count(tile) == 3:
+            if len(self.deck) == 0: # Deck might have become empty during the loop
+                    tile = -1
             if tile >= 35: # Special tile (flower or season)
                 self.players[self.current_player].specials.append(tile)
                 tile = self.deck.pop(-1) # Draw from the back of the deck
-            elif self.players[self.current_player].hand.count(tile) == 4: # Concealed Kong
+            elif self.players[self.current_player].hand.count(tile) == 3: # Concealed Kong
                 self.players[self.current_player].reveal_meld([tile] * 4)
                 tile = self.deck.pop(-1) # Draw from the back of the deck
         # Add non special tile to players hand
