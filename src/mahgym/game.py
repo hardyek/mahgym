@@ -1,10 +1,13 @@
 from typing import List, Optional
+from .player import Player
 import random
 
-from .player import Player
-
 class MahjongGame:
-    def __init__(self, agent_array, previous_winner=random.randint(0,3)):
+    def __init__(self, agent_array, previous_winner=-1):
+
+        if previous_winner == -1:
+            previous_winner = random.randint(0,3)
+
         self.players: List[Player] = [Player(i) for i in range(4)]
         self.agents = agent_array
 
@@ -138,6 +141,7 @@ class MahjongGame:
                     winning_hand = self.players[winner].hand + self.players[winner].exposed
                     break
         
+        winning_hand = self.flatten_mixed_hand(winning_hand)
         return winner, winning_hand
     
     def game_loop_rendered(self, renderer, clock):
@@ -167,7 +171,8 @@ class MahjongGame:
                     break
 
                 clock.tick(10) # 10 FPS           
-
+                
+        winning_hand = self.flatten_mixed_hand(winning_hand)
         return winner, winning_hand
 
     def play_discard_turn(self):
@@ -379,3 +384,11 @@ class MahjongGame:
         wind = player.wind
 
         return pile,hand,exposed,specials,wind
+    
+    def flatten_mixed_hand(self, hand, flattened=[]):
+        for item in hand:
+            if type(item) == int:
+                flattened.append(item)
+            else:
+                self.flatten_mixed_hand(item,flattened)
+        return flattened
