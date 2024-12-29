@@ -194,12 +194,12 @@ namespace t11wo4 {
         TileList sorted_hand = hand;
         std::sort(sorted_hand.begin(), sorted_hand.end());
         
-        // Try each possible pair
+        // try each possible pair
         for (auto it = sorted_hand.begin(); it != sorted_hand.end();) {
             Tile tile = *it;
             auto next = std::find(std::next(it), sorted_hand.end(), tile);
             if (next != sorted_hand.end()) {
-                // Found a pair, remove it and check if remaining tiles form valid sets
+                // found a pair, remove it and check if remaining tiles form valid sets
                 TileList remaining = sorted_hand;
                 remaining.erase(std::find(remaining.begin(), remaining.end(), tile));
                 remaining.erase(std::find(remaining.begin(), remaining.end(), tile));
@@ -231,7 +231,7 @@ namespace t11wo4 {
 
                 TileList remaining = tiles;
                 
-                // Try forming a pung
+                // try forming a pung
                 if (tiles.size() >= 3 && 
                     tiles[0] == tiles[1] && 
                     tiles[1] == tiles[2]) {
@@ -242,7 +242,7 @@ namespace t11wo4 {
                     remaining = tiles;  // backtrack
                 }
 
-                // Try forming a soeng
+                // try forming a soeng
                 if (tiles.size() >= 3) {
                     for (const auto& pattern : soeng_patterns_) {
                         if (std::includes(tiles.begin(), tiles.end(), 
