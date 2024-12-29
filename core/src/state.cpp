@@ -242,7 +242,7 @@ namespace t11wo4 {
                     remaining = tiles;  // backtrack
                 }
 
-                // Try forming a chow
+                // Try forming a soeng
                 if (tiles.size() >= 3) {
                     for (const auto& pattern : soeng_patterns_) {
                         if (std::includes(tiles.begin(), tiles.end(), 
@@ -268,8 +268,8 @@ namespace t11wo4 {
 
     std::vector<std::pair<uint8_t, Action>> GameState::build_interrupt_stack(Tile tile) const {
         auto interrupts = check_for_pung_or_gong(tile);
-        auto chow_interrupts = check_for_soeng(tile);
-        interrupts.insert(interrupts.end(), chow_interrupts.begin(), chow_interrupts.end());
+        auto soeng_interrupts = check_for_soeng(tile);
+        interrupts.insert(interrupts.end(), soeng_interrupts.begin(), soeng_interrupts.end());
         return interrupts;
     }
 
