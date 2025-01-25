@@ -76,7 +76,7 @@ class Game:
                     tile = self.deck.pop(0)
                     player.recieve_tile(tile)
 
-        # Assign wind + Expose specials and redraw + Sort hands
+        # Assign wind + Expose specials and redraw
         for i in range(4):
 
             self.players[(self.current_player + i) % 4].wind = i
@@ -91,8 +91,6 @@ class Game:
                     player.hand[i] = self.deck.pop(-1)
                 # Check for new specials after replacement
                 special_indices = [i for i, tile in enumerate(player.hand) if tile > 40]
-
-            player.hand.sort()
 
         # Save pregame daata
         self.data["pregame"] = {
