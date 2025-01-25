@@ -2,12 +2,12 @@ from typing import List
 
 from .player import Player
 
-def draw(deck: List[int], player: Player) -> int:
+def draw(deck: List[int], player: Player) -> None:
     tile = deck.pop(0)
     while tile > 50 or player.count_tile(tile) == 3:
         if len(deck) == 0:
             return -1
-        
+
         if tile > 50:
             player.add_special(tile)
         else:
@@ -16,7 +16,6 @@ def draw(deck: List[int], player: Player) -> int:
         tile = deck.pop(-1)
 
     player.recieve_tile(tile)
-    return tile
 
 def discard(action: int, player: Player) -> int:
     tile = player.discard_tile(action)
