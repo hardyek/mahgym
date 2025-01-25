@@ -126,7 +126,7 @@ class Game:
             self._complete_pickup_turn()
             winner = utils.check_for_winner(self.current_player, self.players, self.takable)
             if winner != -1:
-                winning_hand = (self.players[winner].hand , self.players[winner].exposed, self.players[winner].specials, True)
+                winning_hand = (self.players[winner].hand, self.players[winner].exposed, self.players[winner].specials, True)
                 break
 
         return winner, winning_hand
@@ -164,6 +164,11 @@ class Game:
         if pickup_action == 0:
             self.current_player = (self.current_player + 1) % 4
             self._draw()
+
+    # Post Game
+    def _post_game(self, scores):
+        pass
+        # return new_scores
 
     # From actions.py
     def _draw(self):
