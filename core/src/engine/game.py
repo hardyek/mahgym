@@ -2,11 +2,12 @@ from typing import List, Any
 import random
 
 from .player import Player
-import actions
 import utils
 
+from shorthand import to_shorthand
+
 class Game:
-    def __init__(self, agent_array: List[Any]):
+    def __init__(self, agent_array: List[Any], round_wind):
 
         self.players: List[Player] = [Player(i) for i in range(4)]
         self.agents = agent_array
@@ -44,7 +45,7 @@ class Game:
 
         self.data = {
             "pregame" : {},
-            "interupts" : {},
+            "interupts" : [],
             "moves" : [],
             "postgame" : {},
         }
@@ -57,7 +58,7 @@ class Game:
         self.current_player: int = self.starting_player
         self.next_player: int = (self.current_player + 1) % 4
 
-        self.wind_round: int = 0
+        self.round_wind: int = round_wind
 
         self.game_over: bool = False
         self.winner: int = -1 # Initialised as -1 for Typing
@@ -97,7 +98,7 @@ class Game:
             "deck" : self.deck,
             "starting_hands" : [player.hand for player in self.players],
             "starting_player" : self.current_player,
-            "starting_wind" : self.wind_round
+            "starting_wind" : self.round_wind
         }
 
     # Main Game Loop
@@ -114,31 +115,49 @@ class Game:
             self._complete_discard_turn()
             winner = utils.check_for_winner(self.current_player, self.players, self.takable)
             if winner != -1:
-                winning_hand = (self.players[winner].hand + [self.takable], self.players[winner].exposed, self.players[winner].specials, False)
+                is_self_drawn = False
                 break
 
             # Empty deck check
             if len(self.deck) == 0:
-                winning_hand = ([-1] * 14, [], [], True)
-                break
+                return {"result": "draw"}
 
             # Pickup Turn
             self._complete_pickup_turn()
             winner = utils.check_for_winner(self.current_player, self.players, self.takable)
             if winner != -1:
-                winning_hand = (self.players[winner].hand, self.players[winner].exposed, self.players[winner].specials, True)
+                is_self_drawn = True
                 break
 
-        return winner, winning_hand
+
+
+        return {
+            "result": "win",
+            "winner": winner,
+            "concealed_hand": self.players[winner].hand,
+            "exposed_melds": self.players[winner].exposed,
+            "specials": self.players[winner].specials,
+            "winning_tile": self.takable,
+            "winning_condition": is_self_drawn,
+            "player_role": "dealer" if self.players[winner].wind == 0 else "non_dealer",
+            "seat_wind": ["East", "South", "West", "North"][self.players[winner].wind],
+            "round_wind": ["East", "South", "West", "North"][self.round_wind],
+            "kongs_declared": ["exposed" if meld.count(meld[0]) == 4 else None for meld in self.players[winner].exposed],
+            "robbing_kong": self.takable in [meld[0] for meld in self.players[winner].exposed if len(meld) == 4],
+            "last_tile_draw": len(self.deck) == 0,
+        }
 
     # Discard Turn
     def _complete_discard_turn(self):
         action = self.agents[self.current_player].make_discard()
+        self.data["moves"].append(f"D{self.current_player}{to_shorthand[action]}") # Shorthand D{player}{tile}
         self._discard(action)
 
     # Pickup Turn
     def _complete_pickup_turn(self):
         interupt_queue = utils.build_interupt_queue(self.takable, self.current_player, self.players)
+
+        self.data["interupts"].append(interupt_queue)
 
         pickup_action: int = 0
 
@@ -165,16 +184,24 @@ class Game:
             self.current_player = (self.current_player + 1) % 4
             self._draw()
 
-    # Post Game
-    def _post_game(self, scores):
-        pass
-        # return new_scores
+    def _draw(self) -> int:
+        tile = self.deck.pop(0)
+        while tile > 50 or self.players[self.current_player].count_tile(tile) == 3:
+            if len(self.deck) == 0:
+                return -1
 
-    # From actions.py
-    def _draw(self):
-        actions.draw(self.deck, self.players[self.current_player])
+            if tile > 50:
+                self.players[self.current_player].add_special(tile)
+            else:
+                self.players[self.current_player].reveal_meld([tile] * 4)
 
-    def _discard(self, action):
-        tile = actions.discard(action, self.players[self.current_player])
+            tile = self.deck.pop(-1)
+
+        self.players[self.current_player].recieve_tile(tile)
+        return tile
+
+    def _discard(self, action) -> int:
+        tile = self.players[self.current_player].discard_tile(action)
         self.takable = tile
         self.pile.append(tile)
+        return tile
