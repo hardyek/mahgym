@@ -4,7 +4,7 @@ import random
 from .player import Player
 import utils
 
-from shorthand import to_shorthand
+from shorthand import to_shorthand, meld_to_shorthand
 
 class Game:
     def __init__(self, agent_array: List[Any], round_wind):
@@ -44,10 +44,10 @@ class Game:
         random.shuffle(self.deck) # hopefully self-explanatory
 
         self.data = {
-            "pregame" : {},
-            "interupts" : [],
-            "moves" : [],
-            "postgame" : {},
+            'pregame' : {},
+            'interupts' : [],
+            'actions' : [],
+            'postgame' : {},
         }
 
         self.pile: List[int] = []
@@ -94,20 +94,37 @@ class Game:
                 special_indices = [i for i, tile in enumerate(player.hand) if tile > 40]
 
         # Save pregame daata
-        self.data["pregame"] = {
-            "deck" : self.deck,
-            "starting_hands" : [player.hand for player in self.players],
-            "starting_player" : self.current_player,
-            "starting_wind" : self.round_wind
+        self.data['pregame'] = {
+            'deck' : self.deck,
+            'starting_hands' : [player.hand for player in self.players],
+            'starting_player' : self.current_player,
+            'starting_wind' : self.round_wind
         }
 
     # Main Game Loop
     def _main_loop(self):
+        self.data['actions'].append(f'B{self.current_player}') # Shorthand B{player} game start on player.
+
         winner = utils.check_for_winner(self.current_player, self.players, -1) # heavenly hand
 
         if winner != -1:
-            winning_hand = (self.players[winner].hand, self.players[winner].exposed, self.players[winner].specials, True)
-            return winner, winning_hand
+            self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
+            self.data['postgame'] = {
+                'result': 'win',
+                'winner': winner,
+                'concealed_hand': self.players[winner].hand,
+                'exposed_melds': self.players[winner].exposed,
+                'specials': self.players[winner].specials,
+                'winning_tile': self.takable,
+                'winning_condition': True,
+                'player_role': 'dealer' if self.players[winner].wind == 0 else 'non_dealer',
+                'seat_wind': ['East', 'South', 'West', 'North'][self.players[winner].wind],
+                'round_wind': ['East', 'South', 'West', 'North'][self.round_wind],
+                'kongs_declared': ['exposed' if meld.count(meld[0]) == 4 else None for meld in self.players[winner].exposed],
+                'robbing_kong': self.takable in [meld[0] for meld in self.players[winner].exposed if len(meld) == 4],
+                'last_tile_draw': len(self.deck) == 0,
+            }
+            return self.data['postgame']
 
         while True:
 
@@ -120,7 +137,9 @@ class Game:
 
             # Empty deck check
             if len(self.deck) == 0:
-                return {"result": "draw"}
+                self.data['actions'].append('W0') # Shorthand W0 declare draw
+                self.data['postgame'] = {'result': 'draw'}
+                return self.data['postgame']
 
             # Pickup Turn
             self._complete_pickup_turn()
@@ -130,34 +149,37 @@ class Game:
                 break
 
 
-
-        return {
-            "result": "win",
-            "winner": winner,
-            "concealed_hand": self.players[winner].hand,
-            "exposed_melds": self.players[winner].exposed,
-            "specials": self.players[winner].specials,
-            "winning_tile": self.takable,
-            "winning_condition": is_self_drawn,
-            "player_role": "dealer" if self.players[winner].wind == 0 else "non_dealer",
-            "seat_wind": ["East", "South", "West", "North"][self.players[winner].wind],
-            "round_wind": ["East", "South", "West", "North"][self.round_wind],
-            "kongs_declared": ["exposed" if meld.count(meld[0]) == 4 else None for meld in self.players[winner].exposed],
-            "robbing_kong": self.takable in [meld[0] for meld in self.players[winner].exposed if len(meld) == 4],
-            "last_tile_draw": len(self.deck) == 0,
+        self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
+        self.data['postgame'] = {
+            'result': 'win',
+            'winner': winner,
+            'concealed_hand': self.players[winner].hand,
+            'exposed_melds': self.players[winner].exposed,
+            'specials': self.players[winner].specials,
+            'winning_tile': self.takable,
+            'winning_condition': is_self_drawn,
+            'player_role': 'dealer' if self.players[winner].wind == 0 else 'non_dealer',
+            'seat_wind': ['East', 'South', 'West', 'North'][self.players[winner].wind],
+            'round_wind': ['East', 'South', 'West', 'North'][self.round_wind],
+            'kongs_declared': ['exposed' if meld.count(meld[0]) == 4 else None for meld in self.players[winner].exposed],
+            'robbing_kong': self.takable in [meld[0] for meld in self.players[winner].exposed if len(meld) == 4],
+            'last_tile_draw': len(self.deck) == 0,
         }
+
+        return self.data['postgame']
 
     # Discard Turn
     def _complete_discard_turn(self):
         action = self.agents[self.current_player].make_discard()
-        self.data["moves"].append(f"D{self.current_player}{to_shorthand[action]}") # Shorthand D{player}{tile}
+        self.data['actions'].append(f'D{self.current_player}{to_shorthand[action]}') # Shorthand D{player}{tile} DISCARD
         self._discard(action)
 
     # Pickup Turn
     def _complete_pickup_turn(self):
         interupt_queue = utils.build_interupt_queue(self.takable, self.current_player, self.players)
 
-        self.data["interupts"].append(interupt_queue)
+        self.data['interupts'].append(interupt_queue)
+        self.data['actions'].append(f'E{len(self.data['interupts'])}') # Shorthand E{turn} END OF TURN
 
         pickup_action: int = 0
 
@@ -171,18 +193,29 @@ class Game:
                 if interupt[1] == 0: # Pung
                     self.players[self.current_player].reveal_meld([self.takable] * 3)
                     self.pile.pop(-1) # Remove takable from the pile
+
+                    self.data['actions'].append(f'P{self.current_player}{to_shorthand[self.takable]}') # Shorthand P{player}{tile} PUNG
+
                 elif interupt[1] == 1: # Gong
                     self.players[self.current_player].reveal_meld([self.takable] * 4)
                     self.pile.pop(-1)
+
+                    self.data['actions'].append(f'G{self.current_player}{to_shorthand[self.takable]}') # Shorthand G{player}{tile} GONG
+
                 elif interupt[1] == 2: # Seong
                     self.players[self.current_player].reveal_meld(interupt[2])
                     self.pile.pop(-1)
+
+                    self.data['actions'].append(f'S{self.current_player}{meld_to_shorthand(interupt[2])}') # Shorthand S{player}{meld} SEONG
 
                 break
 
         if pickup_action == 0:
             self.current_player = (self.current_player + 1) % 4
-            self._draw()
+            tile = self._draw()
+
+            if tile != -1:
+                self.data['actions'].append(f'T{self.current_player}{to_shorthand[tile]}') # Shorthand T{player}{tile} DRAW
 
     def _draw(self) -> int:
         tile = self.deck.pop(0)
@@ -192,8 +225,12 @@ class Game:
 
             if tile > 50:
                 self.players[self.current_player].add_special(tile)
+
+                self.data['actions'].append(f'X{self.current_player}{to_shorthand[tile]}') # Shorthand X{player}{tile} REVEAL SPECIAL
             else:
                 self.players[self.current_player].reveal_meld([tile] * 4)
+
+                self.data['actions'].append(f'H{self.current_player}{to_shorthand[tile]}') # Shorthand H{player}{tile} CONCEALED GONG
 
             tile = self.deck.pop(-1)
 

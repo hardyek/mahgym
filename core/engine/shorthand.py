@@ -26,3 +26,9 @@ to_shorthand = {
     63: "s3",
     64: "s4"
 }
+
+def meld_to_shorthand(meld):
+    str = ""
+    for tile in meld:
+        str += to_shorthand[tile]
+    return str
