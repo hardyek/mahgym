@@ -164,7 +164,6 @@ class Game:
             'robbing_kong': self.takable in [meld[0] for meld in self.players[winner].exposed if len(meld) == 4],
             'last_tile_draw': len(self.deck) == 0,
         }
-
         return self.data['postgame']
 
     # Discard Turn
