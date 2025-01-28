@@ -6,7 +6,7 @@
 Game Flow Markers
 "B" | Begin game - B{player} e.g., B0
 "E" | End of turn - E{turn} e.g., E1
-"W" | Draw game - W0
+"L" | Draw game - W0
 "M" | Declare win - M{player} e.g., M0
 
 Standard Actions

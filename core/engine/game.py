@@ -135,12 +135,6 @@ class Game:
                 is_self_drawn = False
                 break
 
-            # Empty deck check
-            if len(self.deck) == 0:
-                self.data['actions'].append('W0') # Shorthand W0 declare draw
-                self.data['postgame'] = {'result': 'draw'}
-                return self.data['postgame']
-
             # Pickup Turn
             self._complete_pickup_turn()
             winner = utils.check_for_winner(self.current_player, self.players, self.takable)
@@ -148,6 +142,11 @@ class Game:
                 is_self_drawn = True
                 break
 
+            # Empty deck check
+            if len(self.deck) == 0:
+                self.data['actions'].append('L0') # Shorthand L0 declare draw
+                self.data['postgame'] = {'result': 'draw'}
+                return self.data['postgame']
 
         self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
         self.data['postgame'] = {
