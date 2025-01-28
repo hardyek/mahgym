@@ -1,6 +1,6 @@
 from typing import List
 
-def is_winning_hand(hand: List[int], exposed: List[List[int]]) -> bool:
+def is_valid_14(hand: List[int], exposed: List[List[int]]) -> bool:
     sorted_hand = sorted(hand)
                                            # thirteen orphans tiles set
     if len(exposed) == 0 and set(hand) ==  {1,9,11,19,21,29,31,32,33,34,41,42,43}:

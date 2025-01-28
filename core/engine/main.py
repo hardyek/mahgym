@@ -1,10 +1,13 @@
-from typing import List, Any
+from typing import List, Any, Dict
 import random
+from typing_extensions import Optional
 
 from .player import Player
 import utils
 
 from shorthand import to_shorthand, meld_to_shorthand
+
+from scoring import score
 
 class Game:
     def __init__(self, agent_array: List[Any], round_wind):
@@ -105,42 +108,33 @@ class Game:
     def _main_loop(self):
         self.data['actions'].append(f'B{self.current_player}') # Shorthand B{player} game start on player.
 
-        winner = utils.check_for_winner(self.current_player, self.players, -1) # heavenly hand
+        potential_winner = utils.check_for_valid_14(self.current_player, self.players, -1) # heavenly hand
 
-        if winner != -1:
-            self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
-            self.data['postgame'] = {
-                'result': 'win',
-                'winner': winner,
-                'concealed_hand': self.players[winner].hand,
-                'exposed_melds': self.players[winner].exposed,
-                'specials': self.players[winner].specials,
-                'winning_tile': self.takable,
-                'winning_condition': True,
-                'player_role': 'dealer' if self.players[winner].wind == 0 else 'non_dealer',
-                'seat_wind': ['East', 'South', 'West', 'North'][self.players[winner].wind],
-                'round_wind': ['East', 'South', 'West', 'North'][self.round_wind],
-                'kongs_declared': ['exposed' if meld.count(meld[0]) == 4 else None for meld in self.players[winner].exposed],
-                'robbing_kong': self.takable in [meld[0] for meld in self.players[winner].exposed if len(meld) == 4],
-                'last_tile_draw': len(self.deck) == 0,
-            }
-            return self.data['postgame']
+        if potential_winner != -1:
+            scoring_info = self._game_end_check(potential_winner)
+            if scoring_info:
+                self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
+                self.data['postgame'] = scoring_info
+                return self.data
+
 
         while True:
 
             # Discard Turn
             self._complete_discard_turn()
-            winner = utils.check_for_winner(self.current_player, self.players, self.takable)
-            if winner != -1:
-                is_self_drawn = False
-                break
+            potential_winner = utils.check_for_valid_14(self.current_player, self.players, self.takable)
+            if potential_winner != -1:
+                scoring_info = self._game_end_check(potential_winner)
+                if scoring_info:
+                    break
 
             # Pickup Turn
             self._complete_pickup_turn()
-            winner = utils.check_for_winner(self.current_player, self.players, self.takable)
-            if winner != -1:
-                is_self_drawn = True
-                break
+            potential_winner = utils.check_for_valid_14(self.current_player, self.players, self.takable)
+            if potential_winner != -1:
+                scoring_info = self._game_end_check(potential_winner)
+                if scoring_info:
+                    break
 
             # Empty deck check
             if len(self.deck) == 0:
@@ -149,21 +143,7 @@ class Game:
                 return self.data['postgame']
 
         self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
-        self.data['postgame'] = {
-            'result': 'win',
-            'winner': winner,
-            'concealed_hand': self.players[winner].hand,
-            'exposed_melds': self.players[winner].exposed,
-            'specials': self.players[winner].specials,
-            'winning_tile': self.takable,
-            'winning_condition': is_self_drawn,
-            'player_role': 'dealer' if self.players[winner].wind == 0 else 'non_dealer',
-            'seat_wind': ['East', 'South', 'West', 'North'][self.players[winner].wind],
-            'round_wind': ['East', 'South', 'West', 'North'][self.round_wind],
-            'kongs_declared': ['exposed' if meld.count(meld[0]) == 4 else None for meld in self.players[winner].exposed],
-            'robbing_kong': self.takable in [meld[0] for meld in self.players[winner].exposed if len(meld) == 4],
-            'last_tile_draw': len(self.deck) == 0,
-        }
+        self.data['postgame'] = scoring_info if scoring_info else {'result' : 'draw'}
         return self.data['postgame']
 
     # Discard Turn
@@ -217,7 +197,7 @@ class Game:
 
     def _draw(self) -> int:
         tile = self.deck.pop(0)
-        while tile > 50 or self.players[self.current_player].count_tile(tile) == 3:
+        while tile > 50 or self.players[self.current_player].count_tile(tile) == 3 or utils.check_promote_pung(tile, self.players[self.current_player]) != -1:
             if len(self.deck) == 0:
                 return -1
 
@@ -225,10 +205,20 @@ class Game:
                 self.players[self.current_player].add_special(tile)
 
                 self.data['actions'].append(f'X{self.current_player}{to_shorthand[tile]}') # Shorthand X{player}{tile} REVEAL SPECIAL
-            else:
+
+            elif self.players[self.current_player].count_tile(tile) == 3:
                 self.players[self.current_player].reveal_meld([tile] * 4)
 
                 self.data['actions'].append(f'H{self.current_player}{to_shorthand[tile]}') # Shorthand H{player}{tile} CONCEALED GONG
+
+            else:
+                action = self.agents[self.current_player].make_promote()
+                if action == 1:
+                    self.players[self.current_player].exposed[utils.check_promote_pung(tile, self.players[self.current_player])].append(tile)
+
+                    self.data['actions'].append(f'G{self.current_player}{to_shorthand[tile]}') # Shorthand G{player}{tile} GONG
+                else:
+                    break
 
             tile = self.deck.pop(-1)
 
@@ -240,3 +230,24 @@ class Game:
         self.takable = tile
         self.pile.append(tile)
         return tile
+
+    def _game_end_check(self, potential_winner) -> Optional[Dict]:
+        scoring_info = {
+            'result': 'win',
+            'winner': potential_winner,
+            'concealed_hand': self.players[potential_winner].hand,
+            'exposed_melds': self.players[potential_winner].exposed,
+            'specials': self.players[potential_winner].specials,
+            'winning_tile': self.takable,
+            'winning_condition': True,
+            'player_role': 'dealer' if self.players[potential_winner].wind == 0 else 'non_dealer',
+            'seat_wind': ['East', 'South', 'West', 'North'][self.players[potential_winner].wind],
+            'round_wind': ['East', 'South', 'West', 'North'][self.round_wind],
+            'kongs_declared': ['exposed' if meld.count(meld[0]) == 4 else None for meld in self.players[potential_winner].exposed],
+            'robbing_kong': self.takable in [meld[0] for meld in self.players[potential_winner].exposed if len(meld) == 4],
+            'last_tile_draw': len(self.deck) == 0,
+        }
+        if score(scoring_info) >= 3:
+            return scoring_info
+        else:
+            return None
