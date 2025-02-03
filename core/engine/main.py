@@ -1,8 +1,9 @@
-from typing import List, Any, Dict
+from typing import List, Type, Dict, Optional
 import random
-from typing_extensions import Optional
 
 from .player import Player
+from ..agents.agent import Agent
+
 import utils
 
 from shorthand import to_shorthand, meld_to_shorthand
@@ -10,7 +11,7 @@ from shorthand import to_shorthand, meld_to_shorthand
 from scoring import score
 
 class Game:
-    def __init__(self, agent_array: List[Any], round_wind):
+    def __init__(self, agent_array: List[Type[Agent]], round_wind):
 
         self.players: List[Player] = [Player(i) for i in range(4)]
         self.agents = agent_array
