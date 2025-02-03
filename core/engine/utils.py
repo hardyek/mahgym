@@ -19,7 +19,7 @@ def check_for_valid_14(current_player: int, players: List[Player], takable: int)
     return -1
 
 def build_interupt_queue(tile: int, current_player: int, players: List[Player]) -> List[tuple[int, int, List[int]]]:
-    interupts = []
+    interrupts = []
     # Check for PUNG or GONG
     next_player = (current_player + 1) % 4
 
@@ -27,14 +27,14 @@ def build_interupt_queue(tile: int, current_player: int, players: List[Player]) 
         tiles_in_hand = players[next_player].count_tile(tile)
 
         if tiles_in_hand == 2:
-            interupts.append((next_player, 0, [tile] * 3)) # 0 for PUNG
+            interrupts.append((next_player, 0, [tile] * 3)) # 0 for PUNG
         elif tiles_in_hand == 3:
-            interupts.append((next_player, 1, [tile] * 4)) # 1 for GONG
+            interrupts.append((next_player, 1, [tile] * 4)) # 1 for GONG
         else:
             # Updgrading a PUNG to a GONG
             for meld in players[next_player].exposed:
                 if meld[0] == tile and meld[1] == tile:
-                    interupts.append((next_player, 1, [tile] * 4))
+                    interrupts.append((next_player, 1, [tile] * 4))
 
         next_player = (next_player + 1) % 4
 
@@ -46,9 +46,9 @@ def build_interupt_queue(tile: int, current_player: int, players: List[Player]) 
 
     for seq in sequences:
         if players[next_player].has_tiles([t for t in seq if t != tile]):
-            interupts.append((next_player, 2, seq))
+            interrupts.append((next_player, 2, seq))
 
-    return interupts
+    return interrupts
 
 def check_promote_pung(tile: int, player: Player) -> int:
     for i in range(len(player.exposed)):

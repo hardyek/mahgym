@@ -49,7 +49,7 @@ class Game:
 
         self.data = {
             'pregame' : {},
-            'interupts' : [],
+            'interrupts' : [],
             'actions' : [],
             'postgame' : {},
         }
@@ -60,7 +60,6 @@ class Game:
         # Abstracting away the entire pre-game dice roll ... stuff
         self.starting_player: int = random.randint(0,3) # Necessary to keep for scoring
         self.current_player: int = self.starting_player
-        self.next_player: int = (self.current_player + 1) % 4
 
         self.round_wind: int = round_wind
 
@@ -157,8 +156,8 @@ class Game:
     def _complete_pickup_turn(self):
         interupt_queue = utils.build_interupt_queue(self.takable, self.current_player, self.players)
 
-        self.data['interupts'].append(interupt_queue)
-        self.data['actions'].append(f'E{len(self.data['interupts'])}') # Shorthand E{turn} END OF TURN
+        self.data['interrupts'].append(interupt_queue)
+        self.data['actions'].append(f'E{len(self.data['interrupts'])}') # Shorthand E{turn} END OF TURN
 
         pickup_action: int = 0
 
