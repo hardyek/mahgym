@@ -13,8 +13,7 @@ from scoring import ScoringInfo, score
 class Game:
     def __init__(self, agent_array: List[Type[Agent]], round_wind):
 
-        self.players: List[Player] = [Player(i) for i in range(4)]
-        self.agents = agent_array
+        self.players: List[Type[Agent]] = agent_array
 
         self.deck: List[int] = [
              # Characters
@@ -151,7 +150,7 @@ class Game:
 
     # Discard Turn
     def _complete_discard_turn(self):
-        action = self.agents[self.current_player].make_discard()
+        action = self.players[self.current_player].make_discard()
         self.data['actions'].append(f'D{self.current_player}{to_shorthand[action]}') # Shorthand D{player}{tile} DISCARD
         self._discard(action)
 
@@ -165,7 +164,7 @@ class Game:
         pickup_action: int = 0
 
         for interupt in interupt_queue:
-            pickup_action = self.agents[interupt[0]].make_pickup(interupt)
+            pickup_action = self.players[interupt[0]].make_pickup(interupt)
 
             if pickup_action == 1:
                 self.current_player = interupt[0]
@@ -227,7 +226,7 @@ class Game:
                 self.last_gong_player = self.current_player
 
             else:
-                action = self.agents[self.current_player].make_promote()
+                action = self.players[self.current_player].make_promote()
                 if action == 1:
                     for i in range(4):
                         check_player = (self.current_player + i) % 4

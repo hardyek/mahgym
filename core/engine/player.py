@@ -1,15 +1,13 @@
 from typing import List, Dict
-from dataclasses import dataclass
 
-@dataclass(slots = True) # For faster attribute access and memory saving
 class Player:
-    seat: int
-    wind: int = 0
-    score: int = 0
-    hand: List[int] = []
-    exposed: List[List[int]] = []
-    specials: List[int] = []
-    _hand_counts: Dict[int, int] = {}
+    def __init__(self):
+        self.seat: int = -1
+        self.wind: int = 0
+        self.hand: List[int] = []
+        self.exposed: List[List[int]] = []
+        self.specials: List[int] = []
+        self._hand_counts: Dict[int, int] = {}
 
     def recieve_tile(self, tile: int) -> None:
         self.hand.append(tile)
