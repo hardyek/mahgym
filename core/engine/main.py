@@ -8,7 +8,7 @@ import utils
 
 from shorthand import to_shorthand, meld_to_shorthand
 
-from scoring import score
+from scoring import ScoringInfo, score
 
 class Game:
     def __init__(self, agent_array: List[Type[Agent]], round_wind):
@@ -67,6 +67,9 @@ class Game:
         self.winner: int = -1 # Initialised as -1 for Typing
         self.winning_score: int = 0
 
+        self.last_gong_made = False  # Track if the last action was a gong
+        self.last_gong_player = -1   # Track who made the last gong
+
     def _initialise_game(self):
         # Deal starting hands
         # not a proper way of dealing but since the deck is shuffled it doesn't matter anyway
@@ -115,7 +118,7 @@ class Game:
             if scoring_info:
                 self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
                 self.data['postgame'] = scoring_info
-                return self.data
+                return self.data['postgame']
 
 
         while True:
@@ -180,6 +183,13 @@ class Game:
 
                     self.data['actions'].append(f'G{self.current_player}{to_shorthand[self.takable]}') # Shorthand G{player}{tile} GONG
 
+                    self.last_gong_made = True  # For scoring
+                    self.last_gong_player = self.current_player
+
+                    extra_tile = self._draw()
+                    if extra_tile != -1:
+                        self.data['actions'].append(f'T{self.current_player}{to_shorthand[extra_tile]}')
+
                 elif interupt[1] == 2: # Seong
                     self.players[self.current_player].reveal_meld(interupt[2])
                     self.pile.pop(-1)
@@ -194,6 +204,8 @@ class Game:
 
             if tile != -1:
                 self.data['actions'].append(f'T{self.current_player}{to_shorthand[tile]}') # Shorthand T{player}{tile} DRAW
+
+        self.takable = -1
 
     def _draw(self) -> int:
         tile = self.deck.pop(0)
@@ -211,12 +223,33 @@ class Game:
 
                 self.data['actions'].append(f'H{self.current_player}{to_shorthand[tile]}') # Shorthand H{player}{tile} CONCEALED GONG
 
+                self.last_gong_made = True # For scoring
+                self.last_gong_player = self.current_player
+
             else:
                 action = self.agents[self.current_player].make_promote()
                 if action == 1:
+                    for i in range(4):
+                        check_player = (self.current_player + i) % 4
+                        if check_player != self.current_player:
+                            if utils.check_for_valid_14(check_player, self.players, tile) != -1:
+                                # Someone can rob the gong!
+                                self.current_player = check_player
+                                self.players[check_player].recieve_tile(tile)
+                                self.takable = tile  # Set takable for scoring
+                                self.data['actions'].append(f'R{check_player}{to_shorthand[tile]}')  # Shorthand R{player}{tile} ROBBING GONG
+                                return tile  # Return the tile so game flow continues normally
+                    
                     self.players[self.current_player].exposed[utils.check_promote_pung(tile, self.players[self.current_player])].append(tile)
 
                     self.data['actions'].append(f'G{self.current_player}{to_shorthand[tile]}') # Shorthand G{player}{tile} GONG
+
+                    self.last_gong_made = True
+                    self.last_gong_player = self.current_player
+
+                    extra_tile = self._draw()
+                    if extra_tile != -1:
+                        self.data['actions'].append(f'T{self.current_player}{to_shorthand[extra_tile]}')
                 else:
                     break
 
@@ -232,22 +265,26 @@ class Game:
         return tile
 
     def _game_end_check(self, potential_winner) -> Optional[Dict]:
-        scoring_info = {
-            'result': 'win',
-            'winner': potential_winner,
-            'concealed_hand': self.players[potential_winner].hand,
-            'exposed_melds': self.players[potential_winner].exposed,
-            'specials': self.players[potential_winner].specials,
-            'winning_tile': self.takable,
-            'winning_condition': True,
-            'player_role': 'dealer' if self.players[potential_winner].wind == 0 else 'non_dealer',
-            'seat_wind': ['East', 'South', 'West', 'North'][self.players[potential_winner].wind],
-            'round_wind': ['East', 'South', 'West', 'North'][self.round_wind],
-            'kongs_declared': ['exposed' if meld.count(meld[0]) == 4 else None for meld in self.players[potential_winner].exposed],
-            'robbing_kong': self.takable in [meld[0] for meld in self.players[potential_winner].exposed if len(meld) == 4],
-            'last_tile_draw': len(self.deck) == 0,
-        }
-        if score(scoring_info) >= 3:
-            return scoring_info
-        else:
-            return None
+        scoring_info = ScoringInfo(
+        concealed_hand = self.players[potential_winner].hand,
+        exposed_melds = self.players[potential_winner].exposed,
+        specials = self.players[potential_winner].specials,
+        winning_tile = self.takable,
+        is_self_drawn = self.takable == -1,  # if takable is -1, it was a self-drawn win
+        is_last_tile = len(self.deck) == 0,
+        is_robbing_Gong = ('R' + str(potential_winner)) in [action[:2] for action in self.data['actions'][-1:]],
+        is_last_Gong = self.last_gong_made and self.last_gong_player == potential_winner,
+        seat_wind = self.players[potential_winner].wind,
+        round_wind = self.round_wind,
+        declared_gongs = [meld for meld in self.players[potential_winner].exposed if len(meld) == 4],
+        is_dealer = self.players[potential_winner].wind == 0
+    )
+        points = score(scoring_info)
+        if points >= 3:
+            return {
+                'result': 'win',
+                'winner': potential_winner,
+                'scoring_info': scoring_info,
+                'points': points
+            }
+        return None

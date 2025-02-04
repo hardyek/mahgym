@@ -2,7 +2,7 @@
 
 ### /engine
 
-Fundamental implementation of the Mahjong game logic and [Hong Kong] scoring system.
+Fundamental implementation of the Mahjong game logic and [Hong gong] scoring system.
 
 ### /interface
 

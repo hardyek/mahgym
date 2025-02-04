@@ -16,7 +16,7 @@ Standard Actions
 Special Actions
 "X" | Reveal Special - X{player}{tile} e.g., X2f1
 "H" | Hidden GONG - H{player}{tile} e.g., H0d1
-
+"R" | Robbing GONG - R{player}{tile} e.g., R2c1
 Meld Claims
 "P" | PUNG - P{player}{tile} e.g., P1n5
 "G" | GONG - G{player}{tile} e.g., G2c7
