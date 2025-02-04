@@ -1,8 +1,8 @@
 from ..engine.player import Player
 
 class Agent(Player):
-    def __init__(self):
-        super(Agent, self).__init__()
+    def __init__(self, seat: int):
+        super().__init__(seat)
         self.score: int = 0
         
     def make_discard(self) -> int:

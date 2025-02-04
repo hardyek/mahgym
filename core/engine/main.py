@@ -1,7 +1,6 @@
 from typing import List, Type, Dict, Optional
 import random
 
-from .player import Player
 from ..agents.agent import Agent
 
 import utils
@@ -118,7 +117,6 @@ class Game:
                 self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
                 self.data['postgame'] = scoring_info
                 return scoring_info
-
 
         while True:
 

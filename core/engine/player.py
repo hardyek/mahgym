@@ -1,8 +1,8 @@
 from typing import List, Dict
 
 class Player:
-    def __init__(self):
-        self.seat: int = -1
+    def __init__(self, seat: int):
+        self.seat: int = seat
         self.wind: int = 0
         self.hand: List[int] = []
         self.exposed: List[List[int]] = []
