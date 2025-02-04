@@ -118,7 +118,7 @@ class Game:
             if scoring_info:
                 self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
                 self.data['postgame'] = scoring_info
-                return self.data['postgame']
+                return scoring_info
 
 
         while True:
@@ -147,7 +147,7 @@ class Game:
 
         self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
         self.data['postgame'] = scoring_info if scoring_info else {'result' : 'draw'}
-        return self.data['postgame']
+        return scoring_info
 
     # Discard Turn
     def _complete_discard_turn(self):
