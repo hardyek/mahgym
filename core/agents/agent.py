@@ -30,7 +30,6 @@ class GameObservation:
 class Agent(Player):
     def __init__(self, seat: int):
         super().__init__(seat)
-        self.score: int = 0
 
     def _create_observation(self, game_state) -> GameObservation:
         other_players = []

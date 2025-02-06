@@ -1,4 +1,6 @@
-from typing import List
+from typing import List, Tuple
+
+from collections import Counter
 
 from .player import Player
 
@@ -35,6 +37,51 @@ def can_form_four_melds(hand: List[int], exposed: List[List[int]]) -> bool:
         if can_form_four_melds(new_hand, exposed + [[hand[0], hand[0]+1, hand[0]+2]]):
             return True
 
+    return False
+
+def check_thirteen_orphans(tiles: List[int]) -> bool:
+    terminals = [1, 9, 11, 19, 21, 29]  # 1s and 9s of each suit
+    honors = [31, 32, 33, 34, 41, 42, 43]  # Winds and dragons
+    required = terminals + honors
+    
+    # Must have all required tiles plus one duplicate
+    return all(t in tiles for t in required) and len(tiles) == 14
+
+def check_seven_pairs(tiles: List[int]) -> bool:
+    if len(tiles) != 14:
+        return False
+    counts = Counter(tiles)
+    return all(count == 2 for count in counts.values()) and len(counts) == 7
+
+def check_pure_terminals(tiles: List[int]) -> bool:
+    valid_tiles = {1, 9, 11, 19, 21, 29}
+    return all(tile in valid_tiles for tile in tiles) and len(tiles) == 14
+
+def check_pure_terminals_and_honors(tiles: List[int]) -> bool:
+    valid_tiles = {1, 9, 11, 19, 21, 29}  # Terminals
+    valid_tiles.update(range(31, 35))  # Winds
+    valid_tiles.update(range(41, 44))  # Dragons
+    return all(tile in valid_tiles for tile in tiles) and len(tiles) == 14
+
+def check_special_patterns(tiles: List[int], self_drawn) -> bool:
+    """
+
+    Do the input tiles make up one of the specified special winning hands.
+
+    Args:
+        tiles (List[int]): 14 Tiles that might make up a special winning hand
+
+    Returns:
+        bool
+    """
+    if check_thirteen_orphans(tiles):
+        return True
+    if check_seven_pairs(tiles) and self_drawn:
+        return True
+    if check_pure_terminals(tiles):
+        return True
+    if check_pure_terminals_and_honors(tiles):
+        return True
     return False
 
 def is_valid_14(hand: List[int], exposed: List[List[int]]) -> bool:
@@ -78,15 +125,17 @@ def check_for_valid_14(current_player: int, players: List[Player], takable: int)
     Returns:
         int: The player who can declare mahjong or -1 if not.
     """
+    
     if takable == -1:
-        if is_valid_14(players[current_player].hand, players[current_player].exposed):
+        if is_valid_14(players[current_player].hand, players[current_player].exposed) or check_special_patterns(players[current_player].hand, True):
             return current_player
 
     else:
         next_player = (current_player + 1) % 4
         while next_player != current_player:
             test_hand = players[next_player].hand + [takable]
-            if is_valid_14(test_hand, players[next_player].exposed):
+            # In Hong Kong rules, special patterns can be completed by picking up tiles
+            if is_valid_14(test_hand, players[next_player].exposed) or check_special_patterns(test_hand, False):
                 return next_player
             next_player = (next_player + 1) % 4
 
