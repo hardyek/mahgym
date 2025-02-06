@@ -62,7 +62,7 @@ class Agent(Player):
         obs = self._create_observation(game)
         return 0
 
-    def make_pickup(self, game) -> int:
+    def make_pickup(self, interupt, game) -> int:
         obs = self._create_observation(game)
         return 0
 
