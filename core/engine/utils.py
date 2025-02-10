@@ -3,6 +3,7 @@ from typing import List, Tuple
 from collections import Counter
 
 from .player import Player
+from limit_hands import check_special_patterns
 
 def can_form_four_melds(hand: List[int], exposed: List[List[int]]) -> bool:
     """
@@ -39,51 +40,6 @@ def can_form_four_melds(hand: List[int], exposed: List[List[int]]) -> bool:
 
     return False
 
-def check_thirteen_orphans(tiles: List[int]) -> bool:
-    terminals = [1, 9, 11, 19, 21, 29]  # 1s and 9s of each suit
-    honors = [31, 32, 33, 34, 41, 42, 43]  # Winds and dragons
-    required = terminals + honors
-    
-    # Must have all required tiles plus one duplicate
-    return all(t in tiles for t in required) and len(tiles) == 14
-
-def check_seven_pairs(tiles: List[int]) -> bool:
-    if len(tiles) != 14:
-        return False
-    counts = Counter(tiles)
-    return all(count == 2 for count in counts.values()) and len(counts) == 7
-
-def check_pure_terminals(tiles: List[int]) -> bool:
-    valid_tiles = {1, 9, 11, 19, 21, 29}
-    return all(tile in valid_tiles for tile in tiles) and len(tiles) == 14
-
-def check_pure_terminals_and_honors(tiles: List[int]) -> bool:
-    valid_tiles = {1, 9, 11, 19, 21, 29}  # Terminals
-    valid_tiles.update(range(31, 35))  # Winds
-    valid_tiles.update(range(41, 44))  # Dragons
-    return all(tile in valid_tiles for tile in tiles) and len(tiles) == 14
-
-def check_special_patterns(tiles: List[int], self_drawn) -> bool:
-    """
-
-    Do the input tiles make up one of the specified special winning hands.
-
-    Args:
-        tiles (List[int]): 14 Tiles that might make up a special winning hand
-
-    Returns:
-        bool
-    """
-    if check_thirteen_orphans(tiles):
-        return True
-    if check_seven_pairs(tiles) and self_drawn:
-        return True
-    if check_pure_terminals(tiles):
-        return True
-    if check_pure_terminals_and_honors(tiles):
-        return True
-    return False
-
 def is_valid_14(hand: List[int], exposed: List[List[int]]) -> bool:
     """
 
@@ -99,10 +55,7 @@ def is_valid_14(hand: List[int], exposed: List[List[int]]) -> bool:
         bool: Y/N
     """
     sorted_hand = sorted(hand)
-                                           # thirteen orphans tiles set
-    if len(exposed) == 0 and set(hand) ==  {1,9,11,19,21,29,31,32,33,34,41,42,43}:
-        return True
-
+    
     for tile in set(sorted_hand):
         if sorted_hand.count(tile) >= 2:
             remaining = sorted_hand[:]

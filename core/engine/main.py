@@ -61,6 +61,10 @@ class Game:
 
         self.round_wind: int = round_wind
 
+        self.heaven: bool = True
+
+        self.discarder: int = -1
+
         self.game_over: bool = False
         self.winner: int = -1 # Initialised as -1 for Typing
         self.winning_score: int = 0
@@ -117,6 +121,8 @@ class Game:
                 self.data['actions'].append(f'M{self.current_player}') # Shorthand M{player} declare win!
                 self.data['postgame'] = scoring_info
                 return scoring_info
+            
+        self.heaven = False
 
         while True:
 
@@ -259,6 +265,7 @@ class Game:
         tile = self.players[self.current_player].discard_tile(action)
         self.takable = tile
         self.pile.append(tile)
+        self.discarder = self.current_player
         return tile
 
     def _game_end_check(self, potential_winner) -> Optional[Dict]:
@@ -274,8 +281,11 @@ class Game:
         seat_wind = self.players[potential_winner].wind,
         round_wind = self.round_wind,
         declared_gongs = [meld for meld in self.players[potential_winner].exposed if len(meld) == 4],
-        is_dealer = self.players[potential_winner].wind == 0
-    )
+        is_dealer = self.players[potential_winner].wind == 0,
+        heaven = self.heaven,
+        discarderd = self.discarder
+        )
+
         points = score(scoring_info)
         if points >= 3:
             return {
