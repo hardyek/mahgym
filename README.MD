@@ -23,4 +23,4 @@ Meld Claims
 "S" | SEONG - S{player}{meld} e.g., S1b123
 ```
 
-See [core/engine/shorthand.py](https://github.com/hardyek/11wo4/blob/main/core/engine/shorthand.py) for tile shorthands
+See [core/engine/shorthand.py](https://github.com/hardyek/mahgym/blob/main/core/engine/shorthand.py) for tile shorthands
