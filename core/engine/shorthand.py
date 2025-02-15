@@ -7,7 +7,7 @@ to_shorthand = {
     21: "b1", 22: "b2", 23: "b3", 24: "b4", 25: "b5", 26: "b6", 27: "b7", 28: "b8", 29: "b9",
     # Winds
     31: "w1", # North
-    32: "w2",# East
+    32: "w2", # East
     33: "w3", # South
     34: "w4", # West
     # Dragons
