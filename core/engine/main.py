@@ -3,11 +3,11 @@ import random
 
 from ..agents._agent import Agent
 
-import utils
+from . import utils
 
-from shorthand import to_shorthand, meld_to_shorthand
+from .shorthand import to_shorthand, meld_to_shorthand
 
-from scoring import ScoringInfo, score
+from .scoring import ScoringInfo, score
 
 class Game:
     def __init__(self, agent_array: List[Type[Agent]], round_wind):

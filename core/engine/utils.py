@@ -3,7 +3,7 @@ from typing import List, Tuple
 from collections import Counter
 
 from .player import Player
-from limit_hands import check_special_patterns
+from .limit_hands import check_special_patterns
 
 def can_form_four_melds(hand: List[int], exposed: List[List[int]]) -> bool:
     """

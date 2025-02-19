@@ -2,7 +2,7 @@ from typing import List, Dict, Set, Tuple
 from collections import Counter
 from dataclasses import dataclass
 
-import limit_hands as lh
+from . import limit_hands as lh
 @dataclass
 class ScoringInfo:
     concealed_hand: List[int]
