@@ -42,7 +42,7 @@ for row, (category_name, tiles) in enumerate(categories):
         plt.imshow(img)
         
         # Add tile information as text below
-        plt.text(0.5, -0.2, f"ID: {tile_id}\n{shorthand}", 
+        plt.text(0.5, -0.2, f"ID: {tile_id}\nSHORT: {shorthand}", 
                 ha='center', transform=ax.transAxes)
             
         plt.axis('off')

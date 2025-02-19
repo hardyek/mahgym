@@ -57,6 +57,8 @@ class Agent(Player):
             last_gong_player=game_state.last_gong_player
         )
     
+    # FOR TYPING / DEBUGGING IN engine
+
     def make_discard(self, game) -> int:
         obs = self._create_observation(game)
         return 0

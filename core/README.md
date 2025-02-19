@@ -1,4 +1,4 @@
-## 11wo4/core
+## mahgym/core
 
 ### /engine
 

@@ -1,4 +1,6 @@
-## 11wo4
+## mahgym
+
+Mahjong built for Analysis
 
 ### Mahjong Shorthand Notation:
 

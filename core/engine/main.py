@@ -1,7 +1,7 @@
 from typing import List, Type, Dict, Optional
 import random
 
-from ..agents.agent import Agent
+from ..agents._agent import Agent
 
 import utils
 
