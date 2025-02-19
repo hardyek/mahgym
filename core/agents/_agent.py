@@ -1,7 +1,7 @@
 from ..engine.player import Player
 
 from dataclasses import dataclass
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 @dataclass
 class PlayerObservation:
@@ -39,7 +39,7 @@ class Agent(Player):
             other_players.append(PlayerObservation(
                 wind=player.wind,
                 num_tiles=len(player.hand),
-                exposed_melds=player.exposed,
+                exposed=player.exposed,
                 specials=player.specials,
                 is_dealer=player.wind == 0
             ))
@@ -47,10 +47,10 @@ class Agent(Player):
         return GameObservation(
             hand=self.hand.copy(),
             round_wind=game_state.round_wind,
-            player_seat=self.seat,
+            seat=self.seat,
             current_player=game_state.current_player,
-            takable_tile=game_state.takable if game_state.takable != -1 else None,
-            deck_size=len(game_state.deck),
+            takable=game_state.takable if game_state.takable != -1 else None,
+            deck_length=len(game_state.deck),
             discard_pile=game_state.pile.copy(),
             other_players=other_players,
             last_gong_made=game_state.last_gong_made,

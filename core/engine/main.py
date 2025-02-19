@@ -93,18 +93,21 @@ class Game:
             player = self.players[(self.current_player + i) % 4]
             # Get indices of all special tiles at once
             special_indices = [i for i, tile in enumerate(player.hand) if tile > 40]
+
             while special_indices:
-                player.specials.extend(player.hand[i] for i in special_indices)
-                # Replace specials with new tiles
-                for i in special_indices:
-                    player.hand[i] = self.deck.pop(-1)
+                for i in sorted(special_indices, reverse=True):
+                    special = player.discard_tile(i)
+                    player.add_special(special)
+                    tile = self.deck.pop(-1)
+                    player.recieve_tile(tile)
                 # Check for new specials after replacement
                 special_indices = [i for i, tile in enumerate(player.hand) if tile > 40]
 
         # Save pregame daata
         self.data['pregame'] = {
             'deck' : self.deck,
-            'starting_hands' : [player.hand for player in self.players],
+            'starting_hands' : [player.hand.copy() for player in self.players],
+            'starting_specials': [player.specials.copy() for player in self.players],
             'starting_player' : self.current_player,
             'starting_wind' : self.round_wind
         }
@@ -154,8 +157,8 @@ class Game:
 
     # Discard Turn
     def _complete_discard_turn(self):
-        action = self.players[self.current_player].make_discard()
-        self.data['actions'].append(f'D{self.current_player}{to_shorthand[action]}') # Shorthand D{player}{tile} DISCARD
+        action = self.players[self.current_player].make_discard(self)
+        self.data['actions'].append(f'D{self.current_player}{to_shorthand[self.players[self.current_player].hand[action]]}') # Shorthand D{player}{tile} DISCARD
         self._discard(action)
 
     # Pickup Turn
@@ -168,7 +171,7 @@ class Game:
         pickup_action: int = 0
 
         for interupt in interupt_queue:
-            pickup_action = self.players[interupt[0]].make_pickup(interupt)
+            pickup_action = self.players[interupt[0]].make_pickup(interupt, self)
 
             if pickup_action == 1:
                 self.current_player = interupt[0]
@@ -230,7 +233,7 @@ class Game:
                 self.last_gong_player = self.current_player
 
             else:
-                action = self.players[self.current_player].make_promote()
+                action = self.players[self.current_player].make_promote(self)
                 if action == 1:
                     for i in range(4):
                         check_player = (self.current_player + i) % 4
@@ -276,22 +279,23 @@ class Game:
         winning_tile = self.takable,
         is_self_drawn = self.takable == -1,  # if takable is -1, it was a self-drawn win
         is_last_tile = len(self.deck) == 0,
-        is_robbing_Gong = ('R' + str(potential_winner)) in [action[:2] for action in self.data['actions'][-1:]],
-        is_last_Gong = self.last_gong_made and self.last_gong_player == potential_winner,
+        is_robbing_gong = ('R' + str(potential_winner)) in [action[:2] for action in self.data['actions'][-1:]],
+        is_last_gong = self.last_gong_made and self.last_gong_player == potential_winner,
         seat_wind = self.players[potential_winner].wind,
         round_wind = self.round_wind,
         declared_gongs = [meld for meld in self.players[potential_winner].exposed if len(meld) == 4],
         is_dealer = self.players[potential_winner].wind == 0,
         heaven = self.heaven,
-        discarderd = self.discarder
+        discarder = self.discarder
         )
 
         points = score(scoring_info)
-        if points >= 3:
+        if points[0] >= 3:
             return {
                 'result': 'win',
                 'winner': potential_winner,
                 'scoring_info': scoring_info,
-                'points': points
+                'points': points[0],
+                'method' : points[1]
             }
         return None

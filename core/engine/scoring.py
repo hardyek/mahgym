@@ -47,7 +47,7 @@ def get_pairs_and_sets(tiles: List[int]) -> Tuple[List[List[int]], List[int]]:
                 
     return sets, pairs
 
-def score(info: ScoringInfo) -> int:
+def score(info: ScoringInfo) -> Tuple[int, str]:
     points = 0
     all_tiles = info.concealed_hand.copy()
     for meld in info.exposed_melds:
@@ -56,31 +56,31 @@ def score(info: ScoringInfo) -> int:
     # Check limit hands first (13 points)
     if not info.exposed_melds:  # These must be concealed
         if lh.check_thirteen_orphans(all_tiles):
-            return 13
+            return 13, "thirteen_orphans"
         if lh.check_nine_gates(all_tiles):
-            return 13
+            return 13, "nine_gates"
         if lh.check_four_concealed_pungs(all_tiles, info.is_self_drawn):
-            return 13
+            return 13, "four_concealed_pungs"
 
     # These limit hands can have exposed melds
     if lh.check_big_four_winds(all_tiles):
-        return 13
+        return 13, "big_four_winds"
     if lh.check_big_three_dragons(all_tiles):
-        return 13
+        return 13, "big_three_dragons"
     if lh.check_all_honors(all_tiles):
-        return 13
+        return 13, "all_honors"
     if lh.check_all_terminals(all_tiles):
-        return 13
+        return 13, "all_terminals"
     if lh.check_all_green(all_tiles):
-        return 13
+        return 13, "all_green"
     if len(info.declared_gongs) == 4:  # Four kongs
-        return 13
+        return 13, "four_declared_gongs"
 
     # Special winning conditions
     if info.is_dealer and len(info.exposed_melds) == 0 and info.winning_tile == -1:  # Heavenly Hand
-        return 13
+        return 13, "heavenly"
     if not info.is_dealer and len(info.exposed_melds) == 0 and info.winning_tile != -1:  # Earthly Hand
-        return 13
+        return 13, "earthly"
 
     # Regular scoring
     points += 1  # Base point for winning
@@ -125,4 +125,4 @@ def score(info: ScoringInfo) -> int:
     if all(len(meld) == 3 and len(set(meld)) == 1 for meld in (concealed_sets + info.exposed_melds)):
         points += 3
 
-    return points
+    return points, "standard"

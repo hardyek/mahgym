@@ -1,9 +1,9 @@
 """
 Human agent class
 """
-from _agent import Agent
+from ._agent import Agent
 
-class Template(Agent):
+class Human(Agent):
     def __init__(self, seat: int):
         super().__init__(seat)
 

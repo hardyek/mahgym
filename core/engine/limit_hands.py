@@ -3,10 +3,14 @@ from collections import Counter
 
 def check_big_four_winds(tiles: List[int]) -> bool:
     wind_counts = Counter(t for t in tiles if 31 <= t <= 34)
+    if len(wind_counts) != 4:
+        return False
     return all(count >= 3 for count in wind_counts.values())
 
 def check_big_three_dragons(tiles: List[int]) -> bool:
     dragon_counts = Counter(t for t in tiles if 41 <= t <= 43)
+    if len(dragon_counts) != 3:
+        return False
     return all(count >= 3 for count in dragon_counts.values())
 
 def check_all_honors(tiles: List[int]) -> bool:

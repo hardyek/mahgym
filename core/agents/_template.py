@@ -1,7 +1,7 @@
 """
 Template class for any Agent implementation
 """
-from _agent import Agent
+from ._agent import Agent
 
 class Template(Agent):
     def __init__(self, seat: int):

@@ -1,7 +1,7 @@
 """
 Random agent class
 """
-from _agent import Agent
+from ._agent import Agent
 
 import random
 
