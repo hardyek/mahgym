@@ -92,7 +92,7 @@ class Game:
 
             player = self.players[(self.current_player + i) % 4]
             # Get indices of all special tiles at once
-            special_indices = [i for i, tile in enumerate(player.hand) if tile > 40]
+            special_indices = [i for i, tile in enumerate(player.hand) if tile > 50]
 
             while special_indices:
                 for i in sorted(special_indices, reverse=True):
@@ -101,7 +101,7 @@ class Game:
                     tile = self.deck.pop(-1)
                     player.recieve_tile(tile)
                 # Check for new specials after replacement
-                special_indices = [i for i, tile in enumerate(player.hand) if tile > 40]
+                special_indices = [i for i, tile in enumerate(player.hand) if tile > 50]
 
         # Save pregame daata
         self.data['pregame'] = {
@@ -183,7 +183,7 @@ class Game:
 
                     self.data['actions'].append(f'P{self.current_player}{to_shorthand[self.takable]}') # Shorthand P{player}{tile} PUNG
 
-                elif interupt[1] == 1: # Gong
+                elif interupt[1] == 1: # Concealed Gong
                     self.players[self.current_player].reveal_meld([self.takable] * 4)
                     self.pile.pop(-1)
 
@@ -201,6 +201,15 @@ class Game:
                     self.pile.pop(-1)
 
                     self.data['actions'].append(f'S{self.current_player}{meld_to_shorthand(interupt[2])}') # Shorthand S{player}{meld} SEONG
+                
+                elif interupt[1] == 3: # Exposed Gong
+                    self.players[self.current_player].promote_pung(interupt[2][0])
+                    self.pile.pop(-1)
+
+                    self.data['actions'].append(f'G{self.current_player}{to_shorthand[self.takable]}') # Shorthand G{player}{tile} GONG
+
+                    self.last_gong_made = True  # For scoring
+                    self.last_gong_player = self.current_player
 
                 break
 
@@ -225,7 +234,8 @@ class Game:
                 self.data['actions'].append(f'X{self.current_player}{to_shorthand[tile]}') # Shorthand X{player}{tile} REVEAL SPECIAL
 
             elif self.players[self.current_player].count_tile(tile) == 3:
-                self.players[self.current_player].reveal_meld([tile] * 4)
+                self.players[self.current_player].reveal_meld([tile] * 3)
+                self.players[self.current_player].promote_pung(tile)
 
                 self.data['actions'].append(f'H{self.current_player}{to_shorthand[tile]}') # Shorthand H{player}{tile} CONCEALED GONG
 
@@ -253,11 +263,17 @@ class Game:
                     self.last_gong_made = True
                     self.last_gong_player = self.current_player
 
+                    if len(self.deck) == 0:
+                        return -1
+                    
                     extra_tile = self._draw()
                     if extra_tile != -1:
                         self.data['actions'].append(f'T{self.current_player}{to_shorthand[extra_tile]}')
                 else:
                     break
+
+            if len(self.deck) == 0:
+                        return -1
 
             tile = self.deck.pop(-1)
 

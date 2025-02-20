@@ -121,24 +121,33 @@ def build_interupt_queue(tile: int, current_player: int, players: List[Player]) 
         if tiles_in_hand == 2:
             interrupts.append((next_player, 0, [tile] * 3)) # 0 for PUNG
         elif tiles_in_hand == 3:
-            interrupts.append((next_player, 1, [tile] * 4)) # 1 for GONG
+            interrupts.append((next_player, 1, [tile] * 4)) # 1 for CONCEALED GONG
         else:
             # Updgrading a PUNG to a GONG
             for meld in players[next_player].exposed:
                 if meld[0] == tile and meld[1] == tile:
-                    interrupts.append((next_player, 1, [tile] * 4))
+                    interrupts.append((next_player, 3, [tile] * 4)) # 3 for EXPOSED GONG
 
         next_player = (next_player + 1) % 4
 
     # Check for SOENG
     next_player = (current_player + 1) % 4
 
-    suit_start = (tile // 10) * 10
-    sequences = [seq for seq in [[tile-2, tile-1, tile],[tile-1, tile, tile+1],[tile, tile+1, tile+2]] if all(suit_start <= t < suit_start + 10 for t in seq)] # what is readability
+    # Only numbered suits (1-9, 11-19, 21-29) can form sequences
+    suit = tile // 10
+    if suit in [0, 1, 2]:  # Only check for sequences in Characters, Circles, and Bamboo
+        suit_start = suit * 10
+        sequences = [
+            seq for seq in [
+                [tile-2, tile-1, tile],
+                [tile-1, tile, tile+1],
+                [tile, tile+1, tile+2]
+            ] if all(suit_start <= t < suit_start + 10 for t in seq)
+        ]
 
-    for seq in sequences:
-        if players[next_player].has_tiles([t for t in seq if t != tile]):
-            interrupts.append((next_player, 2, seq))
+        for seq in sequences:
+            if players[next_player].has_tiles([t for t in seq if t != tile]):
+                interrupts.append((next_player, 2, seq))
 
     return interrupts
 

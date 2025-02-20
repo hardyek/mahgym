@@ -12,7 +12,7 @@ class Random(Agent):
     def make_discard(self, game) -> int:
         obs = self._create_observation(game)
         hand_length = len(obs.hand)
-        action = random.randint(1,hand_length-1)
+        action = random.randint(0,hand_length-1)
         return action
 
     def make_pickup(self, interupt, game) -> int:

@@ -1,9 +1,9 @@
 from typing import List, Dict, Type
 
-from scoring import ScoringInfo
+from .scoring import ScoringInfo
 
-from main import Game
-from ..agents import Agent
+from .main import Game
+from ..agents._agent import Agent
 
 class Table:
     def __init__(self, agent_array: List[Type[Agent]], num_games: int, base_points: int = 1):
@@ -13,7 +13,8 @@ class Table:
         
         self.scores = [0] * 4
         self.chips = [0] * 4  # Track chips/money separately from points
-        self.current_game = 0
+        self.current_wind = 0
+        self.current_game = 0 
         self.game_records = []
 
     def _calculate_payments(self, winner: int, points: int, scoring_info: ScoringInfo):
@@ -59,7 +60,7 @@ class Table:
 
     def play_games(self) -> Dict:
         while self.current_game < self.num_games:
-            round_wind = 31 + (self.current_game // 4)
+            round_wind = 31 + (self.current_wind // 4)
 
             game = Game(self.agents, round_wind)
             game._initialise_game()
@@ -76,17 +77,17 @@ class Table:
                 self._calculate_payments(
                     winner=winner,
                     points=points,
-                    is_self_drawn=result['scoring_info'].is_self_drawn,
-                    is_dealer_win=game.players[winner].wind == 0
+                    scoring_info=result['scoring_info']
                 )
                 
                 # Check if winner was dealer
                 if game.players[winner].wind == 0:
                     pass  # Keep same positions
                 else:
-                    self.current_game += 1  # Only increment game count on non-dealer wins
+                    self.current_wind += 1  # Only increment game count on non-dealer wins
             else:  # Draw
-                self.current_game += 1
+                self.current_wind += 1
+            self.current_game += 1
         
         return {
             'final_scores': self.scores,

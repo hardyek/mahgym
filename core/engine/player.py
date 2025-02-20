@@ -28,6 +28,11 @@ class Player:
                 del self._hand_counts[tile]
         self.exposed.append(meld)
 
+    def promote_pung(self, tile: int) -> None:
+        for i in range(len(self.exposed)):
+            if self.exposed[i][0] == tile and self.exposed[i][1] == tile:
+                self.exposed[i].append(tile)
+
     def add_special(self, tile: int) -> None:
         self.specials.append(tile)
 
