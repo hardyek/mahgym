@@ -18,25 +18,40 @@ def can_form_four_melds(hand: List[int], exposed: List[List[int]]) -> bool:
         bool: Y/N
     """
     sets_needed = 4 - len(exposed)
+    
+    # Base case: we have enough sets
     if sets_needed == 0:
         return len(hand) == 0
-
-    hand = sorted(hand)
-    if len(hand) < 3:
+        
+    # Base case: not enough tiles or empty hand
+    if len(hand) < 3 * sets_needed or len(hand) == 0:
         return False
 
+    hand = sorted(hand)
+    
     # Try PUNG
-    if hand[0] == hand[1] == hand[2]:
+    if len(hand) >= 3 and hand[0] == hand[1] == hand[2]:
         if can_form_four_melds(hand[3:], exposed + [[hand[0]]*3]):
             return True
 
-    # Try SOENG
-    if hand[0] + 1 in hand and hand[0] + 2 in hand:
-        new_hand = hand[:]
-        for i in range(3):
-            new_hand.remove(hand[0] + i)
-        if can_form_four_melds(new_hand, exposed + [[hand[0], hand[0]+1, hand[0]+2]]):
-            return True
+    # Try SOENG - only for numbered suits
+    suit = hand[0] // 10
+    if suit in [0, 1, 2] and len(hand) >= 3:  # Only check for sequences in Characters, Circles, and Bamboo
+        try:
+            # Check if we can form a valid sequence (all in same suit)
+            if (hand[0] + 1 in hand and hand[0] + 2 in hand and 
+                (hand[0] + 1) // 10 == suit and (hand[0] + 2) // 10 == suit):
+                
+                new_hand = hand.copy()
+                # Try to remove all three tiles in sequence
+                for i in range(3):
+                    new_hand.remove(hand[0] + i)
+                    
+                if can_form_four_melds(new_hand, exposed + [[hand[0], hand[0]+1, hand[0]+2]]):
+                    return True
+        except (ValueError, IndexError):
+            # Handle case where we can't remove the needed tiles
+            pass
 
     return False
 
