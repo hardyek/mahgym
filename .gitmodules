@@ -1,0 +1,3 @@
+[submodule "mahnalysis"]
+	path = mahnalysis
+	url = https://github.com/hardyek/mahnalysis.git
