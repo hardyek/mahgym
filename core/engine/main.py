@@ -94,14 +94,17 @@ class Game:
             # Get indices of all special tiles at once
             special_indices = [i for i, tile in enumerate(player.hand) if tile > 50]
 
-            while special_indices:
+            while True:
+                special_indices = [i for i, tile in enumerate(player.hand) if tile > 50]
+                
+                if not special_indices:
+                    break
+
                 for i in sorted(special_indices, reverse=True):
                     special = player.discard_tile(i)
                     player.add_special(special)
                     tile = self.deck.pop(-1)
                     player.recieve_tile(tile)
-                # Check for new specials after replacement
-                special_indices = [i for i, tile in enumerate(player.hand) if tile > 50]
 
         # Save pregame daata
         self.data['pregame'] = {
